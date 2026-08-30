@@ -1,0 +1,25 @@
+[project]
+name = "plinkie-fabriek"
+version = "0.1.0"
+description = "De code factory: een ADK-manager die werk uit het build plan uitdeelt aan engineers in geïsoleerde werkplekken, en hun werk test-gated samenvoegt (werkwijze/caid-ontwerp.html)"
+requires-python = ">=3.13"
+# Derde ADK-service, na de beoordelaar (4.3b) en de speurder (4b.19). Zelfde
+# gepinde major: twee services met een verschillende ADK-major zou betekenen dat
+# een upgrade op de ene de andere stil breekt.
+dependencies = ["google-adk>=2,<3"]
+
+[project.scripts]
+fabriek = "plinkie_fabriek.fabriek:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.4"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/plinkie_fabriek"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

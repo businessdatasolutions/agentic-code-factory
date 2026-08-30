@@ -1,0 +1,122 @@
+{
+  "versie": "1.0.0",
+  "gewijzigd": "30-08-2026",
+  "toelichting": [
+    "Canonieke, machineleesbare bron voor de code factory. Hier wijzig je een instelling,",
+    "en nergens anders.",
+    "",
+    "Twee lezers: de manager (scripts/werkwijze/config.py) en het volgscherm (node).",
+    "Twee lezers betekent twee kansen om uiteen te lopen, en daarom staat `steekproef`",
+    "hieronder: een tabel die beide implementaties moeten reproduceren. De niet-treffers",
+    "wegen daarin het zwaarst — een te breed patroon breekt een run af op werk dat mocht."
+  ],
+  "engineers": 2,
+  "poort": 8788,
+  "basisbranch": "proef/fase7-caid",
+  "stiltedrempel_min": 10,
+  "meldingen_zonder_werk": 3,
+  "kostenplafond": null,
+  "kostenplafond-waarom": "Blijft null tot arm A gedraaid is; dat is het getal waar het plafond een veelvoud van is (PRD O2). Zolang dit null is weigert de manager arm B. Een plafond dat nog niet bekend is, is geen plafond.",
+  "verboden": [
+    "BUILDPLAN.md",
+    "Makefile",
+    "werkwijze/**",
+    "scripts/werkwijze/**",
+    "docs/**"
+  ],
+  "verboden-waarom": {
+    "BUILDPLAN.md": "Checkbox, logregel en teller. Twee schrijvers op dit bestand gaat stil mis; alleen de manager schrijft hier.",
+    "Makefile": "Gedeelde ingang van elke andere agent. Een halve wijziging breekt alle worktrees tegelijk.",
+    "werkwijze/**": "De factory mag zijn eigen regels niet kunnen wijzigen. Een engineer die deze lijst mag aanpassen, is er niet door begrensd.",
+    "scripts/werkwijze/**": "Idem: het gereedschap dat de begrenzing uitvoert.",
+    "docs/**": "De inzendingsartefacten. Een wijziging hoort van een mens te komen."
+  },
+  "exclusief": [
+    "services/fabriek/src/**"
+  ],
+  "exclusief-waarom": "Geen verbod maar een roosterregel: hooguit één engineer tegelijk in de kern van de factory zelf. De manager handhaaft dit bij het uitdelen, niet bij de merge.",
+  "toetsen": {
+    "services/watchdog/**": [
+      "python3 -m compileall -q services/watchdog"
+    ],
+    "services/**": [
+      "make test",
+      "make lint"
+    ],
+    "apps/**": [
+      "make web-test"
+    ],
+    "infra/**": [
+      "make tf-validate"
+    ]
+  },
+  "steekproef": [
+    {
+      "pad": "BUILDPLAN.md",
+      "verwacht": "verboden",
+      "waarom": "exact pad"
+    },
+    {
+      "pad": "Makefile",
+      "verwacht": "verboden",
+      "waarom": "exact pad"
+    },
+    {
+      "pad": "werkwijze/config.json",
+      "verwacht": "verboden",
+      "waarom": "de factory mag zichzelf niet herschrijven"
+    },
+    {
+      "pad": "scripts/werkwijze/config.py",
+      "verwacht": "verboden",
+      "waarom": "idem, het gereedschap"
+    },
+    {
+      "pad": "docs/architecture-factory.svg",
+      "verwacht": "verboden",
+      "waarom": "docs/**"
+    },
+    {
+      "pad": "docs/een/diepe/map/x.svg",
+      "verwacht": "verboden",
+      "waarom": "** kruist mappen"
+    },
+    {
+      "pad": "services/watchdog/join.py",
+      "verwacht": "vrij",
+      "waarom": "gewoon werk"
+    },
+    {
+      "pad": "services/watchdog/tests/test_join.py",
+      "verwacht": "vrij",
+      "waarom": "gewoon werk"
+    },
+    {
+      "pad": "services/watchdog/BUILDPLAN.md",
+      "verwacht": "vrij",
+      "waarom": "alleen de BUILDPLAN.md in de wortel is verboden; een gelijknamig bestand dieper is een ander bestand"
+    },
+    {
+      "pad": "mijn-docs-notitie.md",
+      "verwacht": "vrij",
+      "waarom": "docs/** eist de map, niet het voorvoegsel"
+    },
+    {
+      "pad": "services/docs/leesmij.md",
+      "verwacht": "vrij",
+      "waarom": "docs/** is verankerd in de wortel"
+    },
+    {
+      "pad": "Makefile.oud",
+      "verwacht": "vrij",
+      "waarom": "exact pad matcht niet op een langere naam"
+    },
+    {
+      "pad": "services/fabriek/src/plinkie_fabriek/graaf.py",
+      "verwacht": "exclusief",
+      "waarom": "roosterregel, geen verbod"
+    }
+  ],
+  "steekproef-waarom": "Een tweede implementatie kan stil anders gaan matchen. De niet-treffers zijn even belangrijk als de treffers: een te brede regel breekt een run af op werk dat gewoon mocht, en dat is even schadelijk als een te smalle.",
+  "toetsen-waarom": "Eerste treffer wint, dus specifiek vóór algemeen. Een retest die minuten duurt wordt overgeslagen, en een overgeslagen gate is geen gate. Het paper doet hetzelfde: de engineer draait de tests die de gewijzigde bestanden raken, en pas als er geen koppeling is het hele pak. `make test` blijft dus staan voor alles wat niet fijner is afgebakend."
+}

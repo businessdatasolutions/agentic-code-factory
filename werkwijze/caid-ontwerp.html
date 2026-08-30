@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Technisch ontwerp — CAID op deze repo · v1.4 · 30 augustus 2026</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --tx:#e8eaed; --tx2:#a2a9b6; --tx3:#6f7784;
+    --acc:#4da3ff; --good:#3ecf8e; --warn:#f5b544; --bad:#f2666b;
+    --chip:#232833; --pro:#3ecf8e; --con:#f2666b;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7f9; --panel:#ffffff; --panel2:#f0f2f5; --line:#e0e4ea;
+      --tx:#161a20; --tx2:#5b6472; --tx3:#8b94a3;
+      --acc:#0b6bcb; --good:#0e8a57; --warn:#9a6a06; --bad:#c02b32;
+      --chip:#eef1f5; --pro:#0e8a57; --con:#c02b32;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:24px 16px 100px}
+  h1{font-size:26px;line-height:1.2;margin:0 0 4px;letter-spacing:-.02em}
+  h2{font-size:20px;margin:44px 0 12px;letter-spacing:-.01em;padding-top:14px;border-top:2px solid var(--line)}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:16px;margin:26px 0 8px}
+  h4{margin:18px 0 6px;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+  p{margin:8px 0}
+  .sub{color:var(--tx2);font-size:14px;margin:0 0 6px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px}
+  .meta span{background:var(--chip);border:1px solid var(--line);border-radius:999px;
+    padding:4px 12px;font-size:12.5px;color:var(--tx2)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .note{border-left:3px solid var(--warn)}
+  .note.good{border-left-color:var(--good)}
+  .note.bad{border-left-color:var(--bad)}
+  .note.acc{border-left-color:var(--acc)}
+  ul,ol{margin:8px 0;padding-left:20px}
+  li{margin:5px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0}
+  th{text-align:left;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--tx3);font-weight:600;padding:8px;border-bottom:1px solid var(--line)}
+  td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  a{color:var(--acc)}
+  code{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px}
+  pre{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;
+    overflow-x:auto;font-size:12.5px;line-height:1.55;margin:12px 0}
+  pre code{background:none;border:0;padding:0}
+  .tag{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:999px;
+    border:1px solid var(--line);background:var(--chip);color:var(--tx2);margin-right:4px;vertical-align:middle}
+  .tag.p0{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,transparent)}
+  .tag.p1{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 40%,transparent)}
+  .toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:2px 14px}
+  .toc a{display:block;padding:3px 0;font-size:13.5px;text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  figure{margin:18px 0}
+  figcaption{color:var(--tx2);font-size:12.5px;margin-top:8px}
+  svg{max-width:100%;height:auto;display:block}
+  .box{display:inline-block;width:1.1em;color:var(--tx3)}
+  .box.klaar{color:var(--good)}
+  .taak{margin:14px 0;padding-left:2px}
+  .taak h4{color:var(--tx);text-transform:none;letter-spacing:0;font-size:14.5px;margin:0 0 4px}
+  .klaar{color:var(--good);font-size:13px}
+  footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);color:var(--tx3);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Technisch ontwerp — CAID op deze repo</h1>
+<p class="sub">De architectuur van de lus, het volgscherm waarop je hem kunt volgen en sturen, en het draaiboek om het te bouwen. Hoort bij <a href="caid-prd.html">de PRD</a> en voegt er geen doel aan toe.</p>
+<div class="meta">
+  <span>Versie 1.4 — vervangt v1.3</span><span>30 augustus 2026</span><span>Eigenaar: Witek</span>
+  <span>Status: ter review</span><span>Volgt op PRD v1.0</span>
+</div>
+
+<div class="card note">
+<p style="margin:0"><b>Gewijzigd in v1.4 (30-08-2026): ook de engineer wordt een rol, en het gat uit v1.1 is grotendeels dicht</b> (&sect;10.1, &sect;11b.3, P5). <b>Aanleiding.</b> v1.1 stelde vast dat de managerkant goed gedekt is en dat het gat bij de engineer zat, omdat de documentatie geen uitvoering van code of shell-opdrachten noemde. Dat klopte voor de pagina's die toen zijn gelezen en niet voor het geheel: <b>Google Jules</b> is een codeagent met een REST-API die een GitHub-repository in een eigen VM kloont, daar shell en tests draait, en het werk als branch met een pull request teruggeeft. Daarmee bestaat de engineerlaag als dienst. De engineer wordt dus net als de manager een <b>rol</b> met twee bezettingen, en de manager praat met allebei via één interface.</p>
+<p style="margin:.6em 0 0"><b>Gewijzigd in v1.3 (30-08-2026): de graaf komt niet uit het build plan</b> (&sect;4.3, C1b, PRD W1). <b>Aanleiding is de bouw van C1b.</b> In heel <code>BUILDPLAN.md</code> schrijft <b>precies één subtaak</b> zijn afhankelijkheid uit in een vorm die een machine kan lezen: 7.3 vereist 6.18 t/m 6.21. De volgorde van al het andere zit in het hoofd van wie het plan schreef. Een manager die de graaf "uit het plan leest" leest er dus één rand en raadt de rest, en raden zonder het te zeggen is de faalwijze die het paper bij zwakke opdeling beschrijft. De randen staan daarom met de hand in <code>opzet.json</code>, en wat het plan wél zegt komt er altijd bij. Verder is de acceptatie-eis van C1b rechtgezet: hij eiste dat een merge precies één stand verandert, en dat is onjuist.</p>
+<p style="margin:.6em 0 0"><b>Gewijzigd in v1.2 (30-08-2026): twee soorten begrenzing, en de proef mag zijn eigen regels niet wijzigen</b> (&sect;9, PRD &sect;5). <b>Aanleiding is de bouw van C1.</b> De twee documenten spraken elkaar tegen: de PRD zette <code>db/duckdb/</code> op "hooguit één engineer per run", dit document zette hem in de verbodslijst. Dat zijn twee verschillende dingen en ze bestaan nu allebei met een eigen naam en een eigen plek van handhaving: <b>verboden</b> wordt getoetst op de diff vlak vóór de merge, <b>exclusief</b> wordt toegepast bij het uitdelen. En er ontbrak een pad: <code>werkwijze/**</code> stond nergens, zodat een engineer de lijst kon wijzigen die hem begrenst.</p>
+<p style="margin:.6em 0 0"><b>Gewijzigd in v1.1 (30-08-2026): de manager wordt een rol in bestanden, niet een sessie</b> (&sect;2, &sect;4.4, C1 en C16). <b>Aanleiding.</b> De cloud is de bestemming, en dat maakt de vraag uit O4 een andere vraag dan hij leek. Van de dertien managertaken breken er in de cloud twee, en het denkwerk zit daar niet bij: wie de manager wekt, en waar zijn toestand leeft. Haal de mens uit "de sessie is de manager", en er blijft een model met een manageropdracht over dat door een wekker wordt aangeslagen. Dat is de manageragent uit optie C. <b>A en C zijn daarmee geen twee architecturen maar twee bezettingen van dezelfde rol</b>, en het ontwerp hoorde die rol te beschrijven in plaats van de bezetting. Wat erbij komt: <code>manager.md</code>, <code>graaf.json</code> en een expliciete overdracht. Wat eruit gaat: de aanname dat de manager iets in zijn hoofd mag houden.</p>
+</div>
+
+<div class="card note good">
+<p style="margin:0"><b>Drie besluiten dragen dit document.</b></p>
+<p style="margin:.5em 0 0"><b>O4.</b> De manager is een <b>rol</b>, vastgelegd in <code>werkwijze/manager.md</code> plus een toestandscontract. In de eerste run wordt die rol bezet door <b>deze sessie</b>; hij is zo geschreven dat een gewekte cloudsessie hem later kan overnemen zonder herbouw. Zie &sect;2.</p>
+<p style="margin:.5em 0 0"><b>O5.</b> Het aantal engineers is <b>een instelling</b> in <code>werkwijze/config.json</code>, standaard 2. Opschalen is dan een wijziging van één getal en geen verbouwing.</p>
+<p style="margin:.5em 0 0"><b>O8.</b> Run 1 draait <b>lokaal</b>, en de vorm die de cloud straks krijgt blijft open. Het ontwerp betaalt daarom voor draagbaarheid en niet voor een gekozen cloudvorm.</p>
+</div>
+
+<div class="card">
+<h4 style="margin-top:0">Inhoud</h4>
+<div class="toc">
+<a href="#s1">1. Wat er gebouwd wordt</a>
+<a href="#s2">2. De manager is een rol, geen sessie</a>
+<a href="#s3">3. Componenten en datastromen</a>
+<a href="#s4">4. Worktrees, runmap en de overdracht</a>
+<a href="#s5">5. Het logboek: gemeld en gemeten</a>
+<a href="#s6">6. Het volgscherm</a>
+<a href="#s7">7. Het build plan op het scherm, en aanwijzen</a>
+<a href="#s8">8. Waarschuwingen en alarmen</a>
+<a href="#s9">9. De config als enige bron</a>
+<a href="#s10">10. Uitdelen, toetsen, mergen</a>
+<a href="#s11">11. Administratie, noodrem, opruimen</a>
+<a href="#s11b">11b. De weg naar Gemini Enterprise</a>
+<a href="#s12">12. Wat we bewust niet bouwen</a>
+<a href="#s13">13. Draaiboek C1–C15</a>
+<a href="#s14">14. De droogloop als gate</a>
+<a href="#s15">15. Wat er in bestaande bestanden verandert</a>
+<a href="#s16">16. Open punten</a>
+</div>
+</div>
+
+<h2 id="s1"><span class="n">1</span>Wat er gebouwd wordt</h2>
+
+<p>Twee dingen, en ze hangen aan elkaar.</p>
+<ul>
+<li><b>De lus.</b> Een manager die uit <code>BUILDPLAN.md</code> een afhankelijkheidsgraaf leest, subtaken uitdeelt aan engineers in een eigen worktree, na hun commit merget naar een proefbranch en de administratie bijwerkt. Dat is de werkwijze uit het paper, met de twee toevoegingen die de PRD noemt: een verbodslijst die de run afbreekt, en de administratie als aparte stap met één schrijver.</li>
+<li><b>Het volgscherm.</b> Een pagina op <code>127.0.0.1</code> die laat zien wat er gebeurt terwijl het gebeurt: het build plan van Plinkie met de status per subtaak, wat elke engineer onder handen heeft, waarschuwingen en alarmen, en het logboek. Op datzelfde scherm wijs je aan waar de manager in de volgende ronde aan moet werken.</li>
+</ul>
+
+<p>Het volgscherm is geen bijproduct. Het paper wijst de keuze van de manager aan als de sterkste hefboom op de uitkomst: twee runs op dezelfde repository liepen 8,7% tegen 34,3% uiteen, en het verschil was welke bestanden werden toebedeeld. Wie die keuze kan zien en bijsturen, stuurt aan de kant waar de winst zit.</p>
+
+<h2 id="s2"><span class="n">2</span>De manager is een rol, geen sessie</h2>
+
+<h3>2.1 Dertien taken in drie soorten</h3>
+<p>De rol is pas te bezetten als hij scherp is. Er zit <b>denkwerk</b> in (de graaf lezen, kiezen wát er wordt uitgedeeld, de opdracht schrijven, beslissen of een rode retest teruggaat), <b>machinewerk</b> (de verbodslijst tegen de diff houden, mergen, retesten, terugdraaien, het lopend totaal hertellen, elke gebeurtenis in het logboek zetten, het budget bewaken) en <b>wachtwerk</b> (horen dat een engineer klaar is, jouw aanwijzing lezen vóór de volgende ronde).</p>
+<p>Denkwerk vraagt een model. Machinewerk vraagt bestands- en git-toegang plus een klok. Wachtwerk vraagt dat iets blijft bestaan tussen gebeurtenissen door. Vier vormen verdelen dat verschillend:</p>
+
+<table>
+<tr><th></th><th>A · de sessie</th><th>B · een gescript draaiboek</th><th>C · een manageragent</th><th>D · A met planner</th></tr>
+<tr><td>Git en administratie</td><td>direct, gemeten</td><td>alleen via een agent</td><td>via de agent, gemeld</td><td>direct, gemeten</td></tr>
+<tr><td>Bijsturen tijdens de run</td><td>altijd</td><td>nauwelijks</td><td>moeizaam</td><td>altijd</td></tr>
+<tr><td><code>aanwijzing.json</code></td><td>gegarandeerd gelezen</td><td>niet op een klok</td><td>als hij eraan denkt</td><td>gegarandeerd</td></tr>
+<tr><td>Herhaalbaar</td><td>nee</td><td>ja, met hervatten</td><td>nee</td><td>nee</td></tr>
+<tr><td>Trouw aan het paper</td><td>laag</td><td>midden</td><td>hoog</td><td>midden</td></tr>
+<tr><td>Kosten</td><td>laagst</td><td>hoogst</td><td>hoog</td><td>laag plus één agent</td></tr>
+</table>
+
+<p>Twee eigenschappen zetten B opzij voor deze proef, en ze staan in de scriptreferentie: <b>een draaiboekscript heeft geen bestandstoegang en geen Node-functies</b>, dus het kan zelf niet mergen, het build plan niet lezen en het logboek niet schrijven; en <b>de klok is er niet</b>, want die zou hervatten breken, dus een stiltedrempel van tien minuten is er niet in uit te rekenen. Alles wat wij machinewerk noemen zou dan een modelaanroep worden in plaats van een git-aanroep van milliseconden.</p>
+
+<h3>2.2 In de cloud vallen A en C samen</h3>
+<p>Optie A heet "de sessie is de manager", en die sessie is bijzonder omdat er een mens in zit. Haal die mens eruit en er blijft een model over met een manageropdracht, aangeslagen door een wekker, dat zijn toestand van schijf leest. Dat is optie C.</p>
+
+<div class="card note acc">
+<p style="margin:0"><b>A en C zijn geen twee architecturen maar twee bezettingen van dezelfde rol.</b> Wat A vandaag extra geeft — je kunt ingrijpen, en het is goedkoop omdat de context al warm is — bestaat alleen lokaal. Van de dertien taken breken er bij een verhuizing precies twee, en het denkwerk zit daar niet bij: <b>wie de manager wekt</b>, en <b>waar zijn toestand leeft</b>. Het ontwerp beschrijft daarom de rol en niet de bezetting.</p>
+</div>
+
+<p>Voor D geldt dat niet, en dat is een verbetering die vaak voor een cloudstap wordt aangezien: de planneragent scheidt de delegatiekeuze af als eigen variabele, maar het machinewerk en het wachtwerk blijven in de sessie. D verhuist dus even slecht als A, en helpt aan een andere kant.</p>
+
+<h3>2.3 Wat de rol vastlegt</h3>
+<table>
+<tr><th>Bestand</th><th>Wat erin staat</th><th>Waarom het een bestand is</th></tr>
+<tr><td><code>werkwijze/manager.md</code></td><td>De rol als opdracht: wat hij leest, hoe hij kiest, wat hij schrijft, wanneer hij afbreekt</td><td>Vandaag volgt deze sessie hem, straks een gewekte agent. Zelfde tekst, andere bezetting. En een opdracht in een bestand is te wijzigen en te vergelijken zonder een gesprek te voeren</td></tr>
+<tr><td><code>graaf.json</code></td><td>De afhankelijkheidsgraaf met een stand per subtaak, bijgewerkt na elke merge</td><td>Nu houdt de manager die in zijn hoofd. Een koude start heeft geen hoofd</td></tr>
+<tr><td>De overdracht (&sect;4.4)</td><td>De lijst van wat een verse manager moet lezen om verder te kunnen</td><td>Klopt die lijst, dan is het om het even wie de rol speelt. Klopt hij niet, dan werkt alleen de bezetting die er toevallig al was</td></tr>
+</table>
+
+<h3>2.4 De manager draait vandaag in ronden</h3>
+<p>Zolang deze sessie de rol bezet, draait de manager niet continu. Hij komt tot leven wanneer er een ronde start: jij typt iets, een achtergrondagent meldt zich klaar, of een bewaking slaat aan. Tussen twee ronden staat hij stil. De engineers niet: die draaien als achtergrondtaken door.</p>
+
+<div class="card note bad">
+<p style="margin:0"><b>Dat moet het scherm vertellen, anders liegt het.</b> Een hartslag naast "Manager" zou suggereren dat er iemand meekijkt terwijl er niemand is. Het scherm toont daarom bij de manager <b>het tijdstip van zijn laatste handeling</b> en de tekst <i>wacht op de volgende ronde</i>, en bij de engineers wél een lopende meting. Wat jij aanwijst, wordt opgepakt aan het begin van de eerstvolgende ronde, en het scherm zegt dat er ook bij.</p>
+</div>
+
+<p>Drie gevolgen, en alle drie blijven ze gelden als de rol later anders bezet wordt:</p>
+<ul>
+<li><b>De waarheid staat op schijf, niet in het geheugen van de manager.</b> Valt de sessie weg, dan is de stand terug te lezen. Dat was bedoeld tegen een weggevallen gesprek en is nu precies wat een koude cloudstart nodig heeft.</li>
+<li><b>Het volgscherm is een eigen proces.</b> Het heeft de manager niet nodig om te blijven tonen wat er is.</li>
+<li><b>De manager wordt gewekt.</b> Lokaal door jou en door een <code>Monitor</code> over het logboek, die alleen alarmen en klaarmeldingen doorgeeft. In de cloud door een tijdschakelaar of een gebeurtenis. De wekker verandert, de rol niet.</li>
+</ul>
+
+<h2 id="s3"><span class="n">3</span>Componenten en datastromen</h2>
+
+<figure>
+<svg viewBox="0 0 960 470" role="img" aria-labelledby="t1 d1" xmlns="http://www.w3.org/2000/svg">
+  <title id="t1">Componenten en datastromen</title>
+  <desc id="d1">De manager in deze sessie deelt taken uit aan engineeragenten, die elk in een eigen worktree werken en meldingen naar het logboek schrijven. Een meter leest daarnaast de git-toestand van elke worktree. Het volgscherm leest logboek, meter en build plan, en schrijft aanwijzingen terug die de manager bij zijn volgende ronde leest.</desc>
+  <defs>
+    <marker id="p1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--tx3)"/></marker>
+    <marker id="p2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--acc)"/></marker>
+    <marker id="p3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--good)"/></marker>
+  </defs>
+
+  <rect x="18" y="18" width="250" height="70" rx="10" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.5"/>
+  <text x="32" y="42" font-size="13" font-weight="700" fill="var(--tx)">Manager — deze sessie</text>
+  <text x="32" y="60" font-size="11.5" fill="var(--tx2)">leest de graaf, deelt uit, merget,</text>
+  <text x="32" y="76" font-size="11.5" fill="var(--tx2)">schrijft de administratie</text>
+
+  <rect x="18" y="118" width="250" height="62" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+  <text x="32" y="142" font-size="13" font-weight="700" fill="var(--tx)">BUILDPLAN.md (uit main)</text>
+  <text x="32" y="160" font-size="11.5" fill="var(--tx2)">de graaf komt hiervandaan,</text>
+  <text x="32" y="174" font-size="11.5" fill="var(--tx2)">alleen-lezen tijdens de run</text>
+
+  <path d="M143,118 L143,90" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#p1)"/>
+
+  <rect x="345" y="18" width="240" height="82" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+  <text x="359" y="42" font-size="13" font-weight="700" fill="var(--tx)">Engineer 1 — agent</text>
+  <text x="359" y="60" font-size="11.5" fill="var(--tx2)">worktree eng-1, eigen branch</text>
+  <text x="359" y="78" font-size="11.5" fill="var(--good)">zelfcontrole vóór elke commit</text>
+  <text x="359" y="94" font-size="11.5" fill="var(--tx3)">draait door als de manager stilstaat</text>
+
+  <rect x="345" y="118" width="240" height="62" rx="10" fill="var(--panel)" stroke="var(--line)" stroke-dasharray="4 3"/>
+  <text x="359" y="142" font-size="13" font-weight="700" fill="var(--tx2)">Engineer N — agent</text>
+  <text x="359" y="160" font-size="11.5" fill="var(--tx2)">aantal uit config.json,</text>
+  <text x="359" y="174" font-size="11.5" fill="var(--tx2)">standaard 2</text>
+
+  <path d="M268,50 L341,50" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#p1)"/>
+  <text x="272" y="42" font-size="10.5" fill="var(--tx3)">opdracht</text>
+
+  <rect x="662" y="18" width="280" height="82" rx="10" fill="var(--panel)" stroke="var(--good)" stroke-width="1.5"/>
+  <text x="676" y="42" font-size="13" font-weight="700" fill="var(--tx)">gebeurtenissen.jsonl</text>
+  <text x="676" y="60" font-size="11.5" fill="var(--tx2)">append-only, één regel per gebeurtenis</text>
+  <text x="676" y="78" font-size="11.5" fill="var(--tx2)">bron: gemeld (agent) of gemeten (git)</text>
+  <text x="676" y="94" font-size="11.5" fill="var(--tx3)">overleeft het wegvallen van de sessie</text>
+
+  <path d="M585,50 L658,50" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#p1)"/>
+  <text x="590" y="42" font-size="10.5" fill="var(--tx3)">meldt</text>
+
+  <path d="M268,68 C300,68 300,240 640,240 L640,66 L658,66" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#p1)"/>
+  <text x="300" y="234" font-size="10.5" fill="var(--tx3)">de manager meldt ook: uitgedeeld, gemerged, afgebroken</text>
+
+  <rect x="345" y="212" width="240" height="62" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+  <text x="359" y="236" font-size="13" font-weight="700" fill="var(--tx)">De meter</text>
+  <text x="359" y="254" font-size="11.5" fill="var(--tx2)">leest elke 2 s de git-toestand</text>
+  <text x="359" y="268" font-size="11.5" fill="var(--tx2)">van elke worktree</text>
+
+  <path d="M465,180 L465,208" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#p1)"/>
+  <path d="M585,240 L640,240" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#p1)"/>
+
+  <rect x="662" y="300" width="280" height="86" rx="10" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.5"/>
+  <text x="676" y="324" font-size="13" font-weight="700" fill="var(--tx)">Volgscherm — eigen proces</text>
+  <text x="676" y="342" font-size="11.5" fill="var(--tx2)">node, 127.0.0.1, geen build-stap</text>
+  <text x="676" y="360" font-size="11.5" fill="var(--tx2)">leest logboek, meter en build plan</text>
+  <text x="676" y="378" font-size="11.5" fill="var(--tx2)">duwt wijzigingen via SSE naar de pagina</text>
+
+  <path d="M802,100 L802,296" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#p1)"/>
+  <path d="M268,150 C300,150 300,343 658,343" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#p1)"/>
+
+  <rect x="18" y="300" width="250" height="86" rx="10" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.5"/>
+  <text x="32" y="324" font-size="13" font-weight="700" fill="var(--tx)">aanwijzing.json</text>
+  <text x="32" y="342" font-size="11.5" fill="var(--tx2)">wat jij aanwijst voor de voorrang</text>
+  <text x="32" y="360" font-size="11.5" fill="var(--tx2)">volgorde, uitsluitingen, stop</text>
+  <text x="32" y="378" font-size="11.5" fill="var(--acc)">de manager leest dit bij elke ronde</text>
+
+  <path d="M662,352 L290,352" stroke="var(--acc)" stroke-width="1.5" fill="none" marker-end="url(#p2)"/>
+  <path d="M143,300 L143,90" stroke="var(--acc)" stroke-width="1.5" fill="none" stroke-dasharray="5 4" marker-end="url(#p2)"/>
+
+  <rect x="18" y="410" width="924" height="46" rx="10" fill="var(--panel)" stroke="var(--good)" stroke-width="1.5"/>
+  <text x="32" y="432" font-size="12.5" font-weight="700" fill="var(--tx)">proef/fase7-caid — de enige plek waar werk samenkomt</text>
+  <text x="32" y="448" font-size="11.5" fill="var(--tx2)">de manager merget hierheen en opnieuw getoetst; de stap naar main is handwerk van een mens</text>
+
+  <path d="M465,274 L465,406" stroke="var(--good)" stroke-width="1.5" fill="none" marker-end="url(#p3)"/>
+</svg>
+<figcaption>Blauw is de stuurweg van jou naar de manager, groen de weg waarlangs werk samenkomt. De meter en het volgscherm hebben de manager niet nodig om te blijven werken.</figcaption>
+</figure>
+
+<h2 id="s4"><span class="n">4</span>Worktrees, branches en de runmap</h2>
+
+<h3>4.1 Waar het werk staat</h3>
+<p>Elke engineer krijgt een eigen worktree onder <code>.claude/worktrees/</code>, binnen de repo. Dat is met opzet: een worktree buiten de projectmap valt buiten de werkmappen van deze sessie, en dan wordt elke schrijfhandeling een vraag om toestemming.</p>
+
+<pre><code>git worktree add .claude/worktrees/eng-1 -b proef/fase7-caid-eng1 proef/fase7-caid
+git worktree add .claude/worktrees/eng-2 -b proef/fase7-caid-eng2 proef/fase7-caid</code></pre>
+
+<table>
+<tr><th>Branch</th><th>Wie schrijft</th><th>Wat er staat</th></tr>
+<tr><td><code>main</code></td><td>alleen een mens</td><td>Onaangeroerd tijdens de run</td></tr>
+<tr><td><code>proef/fase7-caid</code></td><td>alleen de manager</td><td>De basis, elke merge, en de administratie</td></tr>
+<tr><td><code>proef/fase7-caid-engN</code></td><td>engineer N</td><td>Zijn eigen commits. Blijft na afloop staan als bewijs</td></tr>
+<tr><td><code>proef/fase7-enkel</code></td><td>de enkelvoudige arm</td><td>Arm A uit de PRD, ter vergelijking</td></tr>
+</table>
+
+<h3>4.2 Opwarmen, en wat dat kost</h3>
+<p>Elke service heeft een eigen <code>uv</code>-venv, en <code>.venv/</code> staat in <code>.gitignore</code>. Een verse worktree heeft er dus geen enkele. Alle dertien synchroniseren voordat er iets gebeurt is verspilling, dus de opdracht noemt welke services in scope zijn en de manager warmt alleen die op.</p>
+<p>De opwarmtijd per worktree gaat als gemeten regel het logboek in. Dat is een echt deel van de coördinatiebelasting die het paper als beperking opschrijft, en zonder meting verdwijnt hij in de wandklok.</p>
+
+<h3>4.3 De runmap</h3>
+<pre><code>werkwijze/
+  config.json            # instellingen, verbodslijst, toetsen. Eén bron
+  manager.md             # de rol als opdracht — wie hem ook bezet
+  opzet-fase7.json       # het bereik van de eerste run, met de randen met de hand
+  runs/
+    2026-08-30-01/
+      opzet.json         # kopie van de opzet bij de start van de run
+      graaf.json         # de afhankelijkheidsgraaf met een stand per subtaak
+      gebeurtenissen.jsonl
+      aanwijzing.json    # wat jij aanwijst; het volgscherm schrijft, de manager leest
+      meetblad.md        # aan het eind, en dit is het enige dat in git komt</code></pre>
+<p><b>De opzet staat twee keer, en dat is geen tweede waarheid maar een momentopname.</b> <code>werkwijze/opzet-fase7.json</code> is het bereik zoals het bedacht is en staat in git; de kopie in de runmap bevriest wat er gold toen de run startte, zodat een meetblad achteraf te lezen blijft ook als het bereik intussen is bijgesteld.</p>
+
+<p>Het logboek en de aanwijzing zijn werkbestanden en gaan in <code>.gitignore</code>, om dezelfde reden als <code>rapportage/*.html</code>: ze veranderen elke seconde en zeggen niets over de doeltoestand. Het meetblad blijft wél, want dat is de uitkomst van de proef.</p>
+
+<h3>4.4 De overdracht</h3>
+<p>Eén expliciete lijst van wat een manager moet lezen om een lopende run over te nemen zonder er eerder bij te zijn geweest: <code>config.json</code>, <code>manager.md</code>, <code>opzet.json</code>, <code>graaf.json</code>, <code>aanwijzing.json</code>, en de laatste vijftig regels van het logboek. Verder niets, en dat "verder niets" is de eis.</p>
+<p>De toets erop is hard te maken en hoort in de droogloop: <b>breek de manager halverwege af, laat een tweede de lijst lezen, en kijk of hij dezelfde volgende zet doet.</b> Zolang dat niet lukt, zit er kennis in een hoofd in plaats van in een bestand, en dan is de rol niet overdraagbaar — niet aan een cloudagent, en ook niet aan de sessie van morgen.</p>
+
+<h2 id="s5"><span class="n">5</span>Het logboek: gemeld en gemeten</h2>
+
+<p>Er zijn twee soorten regels, en het verschil is de kern van dit ontwerp.</p>
+
+<table>
+<tr><th>Soort</th><th>Wie schrijft</th><th>Wat het waard is</th></tr>
+<tr><td><b>gemeld</b></td><td>de agent zelf, via een hulpstuk van vier regels</td><td>Rijk en vroeg, en niet te vertrouwen. Een agent die vastloopt houdt op met melden, en een agent die de weg kwijt is meldt vooruitgang die er niet is</td></tr>
+<tr><td><b>gemeten</b></td><td>de meter, uit git en het bestandssysteem</td><td>Arm en laat, en niet te vervalsen. Een commit bestaat of bestaat niet</td></tr>
+</table>
+
+<p>Deze repo maakt dat onderscheid al: <code>rapportage/mutaties.html</code> zegt per run of de lijst gemeten is of gereconstrueerd, en de keurmerkmeting in <code>research/</code> zet per aanbieder welke van twee wegen het getal opleverde. Het volgscherm merkt elke regel daarom met zijn bron, en de interessante gevallen zijn die waarin de twee uiteenlopen:</p>
+
+<ul>
+<li><b>Wel gemeten, niet gemeld.</b> De worktree verandert terwijl de agent zwijgt. Meestal onschuldig, en het is de enige stand waarin stilte niets betekent.</li>
+<li><b>Wel gemeld, niet gemeten.</b> Drie meldingen op rij zonder één gewijzigd bestand. Dat is een agent die rondjes draait, en het is de goedkoopste waarschuwing die dit ontwerp kan geven.</li>
+<li><b>Geen van beide.</b> Stilte aan beide kanten, langer dan de drempel. Dan is de vraag of hij nog leeft.</li>
+</ul>
+
+<h4>Formaat</h4>
+<pre><code>{"t":"2026-08-30T12:04:11+02:00","bron":"gemeten","wie":"eng-1","soort":"commit",
+ "tekst":"a3f9c21 drempels per gebruiker","subtaak":"7.2"}
+{"t":"2026-08-30T12:04:02+02:00","bron":"gemeld","wie":"eng-1","soort":"toets",
+ "tekst":"make test groen (48 tests)","subtaak":"7.2","uitslag":"groen"}</code></pre>
+<p>Eén regel per gebeurtenis, append-only, en nooit herschreven. Wie een regel wil corrigeren schrijft een nieuwe. Dat is dezelfde afspraak als bij <code>research/</code>, en om dezelfde reden: een logboek dat achteraf verandert kan niets meer bewijzen.</p>
+
+<h2 id="s6"><span class="n">6</span>Het volgscherm</h2>
+
+<p>Een node-programma zonder afhankelijkheden, gestart met <code>make volgscherm</code>, bereikbaar op <code>127.0.0.1:8788</code>. De poort ligt naast die van <code>make beheer-lokaal</code>, dat op <code>8787</code> draait en dezelfde vorm heeft: één bestand, ingebouwde modules, geen build-stap.</p>
+
+<figure>
+<svg viewBox="0 0 960 500" role="img" aria-labelledby="t2 d2" xmlns="http://www.w3.org/2000/svg">
+  <title id="t2">Indeling van het volgscherm</title>
+  <desc id="d2">Bovenaan een balk met de run, de kosten en de status. Links het build plan met per subtaak zijn stand en een aanwijsknop, met onderaan de voorrang. Rechts de manager en de engineers naast elkaar. Onderaan de waarschuwingen en het logboek.</desc>
+
+  <rect x="14" y="14" width="932" height="42" rx="8" fill="var(--panel2)" stroke="var(--line)"/>
+  <circle cx="34" cy="35" r="5" fill="var(--good)"/>
+  <text x="48" y="40" font-size="12.5" font-weight="700" fill="var(--tx)">run 2026-08-30-01 · arm B · bezig</text>
+  <text x="330" y="40" font-size="12" fill="var(--tx2)">engineers 2/2 · ronde 3</text>
+  <text x="530" y="40" font-size="12" fill="var(--tx2)">kosten 3,4 van 12,0</text>
+  <text x="720" y="40" font-size="12" fill="var(--tx2)">wandklok 00:41:12</text>
+  <text x="872" y="40" font-size="12" fill="var(--bad)" font-weight="700">STOP</text>
+
+  <rect x="14" y="66" width="300" height="250" rx="8" fill="var(--panel)" stroke="var(--line)"/>
+  <text x="28" y="88" font-size="11.5" font-weight="700" fill="var(--tx3)">BUILD PLAN — uit main</text>
+  <text x="28" y="112" font-size="12" fill="var(--tx2)">Fase 7 · bewakingsmotor</text>
+  <text x="34" y="134" font-size="12" fill="var(--good)">✓ 7.1 join</text><text x="210" y="134" font-size="11" fill="var(--tx3)">gemerged</text>
+  <text x="34" y="156" font-size="12" fill="var(--acc)">▶ 7.2 drempels</text><text x="210" y="156" font-size="11" fill="var(--acc)">eng-1</text>
+  <text x="34" y="178" font-size="12" fill="var(--tx3)">⛔ 7.3 alert-flow</text><text x="180" y="178" font-size="11" fill="var(--bad)">wacht op 6.21</text>
+  <text x="34" y="200" font-size="12" fill="var(--acc)">▶ 7.4 kalender</text><text x="210" y="200" font-size="11" fill="var(--acc)">eng-2</text>
+  <text x="34" y="222" font-size="12" fill="var(--tx)">○ 7.5 anti-ruis</text>
+  <rect x="196" y="209" width="100" height="18" rx="9" fill="none" stroke="var(--acc)"/>
+  <text x="206" y="222" font-size="10.5" fill="var(--acc)">aanwijzen</text>
+  <text x="34" y="244" font-size="12" fill="var(--tx3)">⛔ 7.6 stap 8</text><text x="180" y="244" font-size="11" fill="var(--tx3)">wacht op 7.1–7.5</text>
+  <line x1="28" y1="258" x2="300" y2="258" stroke="var(--line)"/>
+  <text x="28" y="278" font-size="11.5" font-weight="700" fill="var(--acc)">VOLGENDE JOB</text>
+  <text x="28" y="298" font-size="12" fill="var(--tx)">→ 7.5, daarna 7.6</text>
+  <text x="150" y="298" font-size="11" fill="var(--tx3)">door jou aangewezen</text>
+
+  <rect x="326" y="66" width="620" height="70" rx="8" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.5"/>
+  <text x="340" y="88" font-size="11.5" font-weight="700" fill="var(--tx3)">MANAGER</text>
+  <text x="340" y="110" font-size="12.5" fill="var(--tx)">ronde 3 · 7.2 uitgedeeld, 7.4 uitgedeeld</text>
+  <text x="340" y="128" font-size="11.5" fill="var(--tx2)">laatste handeling 12:04 · wacht op de volgende ronde</text>
+
+  <rect x="326" y="146" width="303" height="170" rx="8" fill="var(--panel)" stroke="var(--line)"/>
+  <text x="340" y="168" font-size="11.5" font-weight="700" fill="var(--tx3)">ENGINEER 1 — eng-1</text>
+  <text x="340" y="190" font-size="12.5" font-weight="700" fill="var(--tx)">7.2 drempels per gebruiker</text>
+  <text x="340" y="210" font-size="11.5" fill="var(--tx2)">services/watchdog, shared</text>
+  <text x="340" y="232" font-size="11.5" fill="var(--good)">▫ 4 commits · 11 bestanden</text>
+  <text x="340" y="252" font-size="11.5" fill="var(--good)">▪ make test groen (48)</text>
+  <text x="340" y="272" font-size="11.5" fill="var(--tx2)">▫ laatste wijziging 8 s geleden</text>
+  <rect x="340" y="286" width="180" height="6" rx="3" fill="var(--panel2)"/>
+  <rect x="340" y="286" width="128" height="6" rx="3" fill="var(--good)"/>
+  <text x="530" y="292" font-size="10.5" fill="var(--tx3)">iteratie 34/80</text>
+
+  <rect x="643" y="146" width="303" height="170" rx="8" fill="var(--panel)" stroke="var(--warn)" stroke-width="1.5"/>
+  <text x="657" y="168" font-size="11.5" font-weight="700" fill="var(--tx3)">ENGINEER 2 — eng-2</text>
+  <text x="657" y="190" font-size="12.5" font-weight="700" fill="var(--tx)">7.4 kalender-triggers</text>
+  <text x="657" y="210" font-size="11.5" fill="var(--tx2)">services/watchdog/tests</text>
+  <text x="657" y="232" font-size="11.5" fill="var(--tx2)">▫ 1 commit · 3 bestanden</text>
+  <text x="657" y="252" font-size="11.5" fill="var(--bad)">▪ make test rood (2 fouten)</text>
+  <text x="657" y="272" font-size="11.5" fill="var(--warn)">▫ stil sinds 6 min</text>
+  <rect x="657" y="286" width="180" height="6" rx="3" fill="var(--panel2)"/>
+  <rect x="657" y="286" width="42" height="6" rx="3" fill="var(--warn)"/>
+  <text x="847" y="292" font-size="10.5" fill="var(--tx3)">iteratie 9/80</text>
+
+  <rect x="14" y="326" width="450" height="160" rx="8" fill="var(--panel)" stroke="var(--warn)" stroke-width="1.5"/>
+  <text x="28" y="348" font-size="11.5" font-weight="700" fill="var(--tx3)">WAARSCHUWINGEN EN ALARMEN</text>
+  <text x="28" y="372" font-size="12" fill="var(--bad)">⛔ eng-2 raakte een verboden bestand: BUILDPLAN.md</text>
+  <text x="46" y="390" font-size="11" fill="var(--tx2)">run afgebroken om 12:03 · G1</text>
+  <text x="28" y="414" font-size="12" fill="var(--warn)">⚠ eng-2 stil sinds 6 min (drempel 10)</text>
+  <text x="28" y="438" font-size="12" fill="var(--warn)">⚠ eng-2 meldde 3× zonder gemeten wijziging</text>
+  <text x="28" y="462" font-size="12" fill="var(--tx2)">◦ kosten op 28% van het plafond</text>
+
+  <rect x="476" y="326" width="470" height="160" rx="8" fill="var(--panel)" stroke="var(--line)"/>
+  <text x="490" y="348" font-size="11.5" font-weight="700" fill="var(--tx3)">LOGBOEK — ▪ gemeld · ▫ gemeten</text>
+  <text x="490" y="372" font-size="11.5" fill="var(--tx2)">12:04:11 ▫ eng-1 commit a3f9c21</text>
+  <text x="490" y="392" font-size="11.5" fill="var(--tx2)">12:04:02 ▪ eng-1 make test groen (48 tests)</text>
+  <text x="490" y="412" font-size="11.5" fill="var(--tx2)">12:03:44 ▫ manager merge eng-1 → proefbranch</text>
+  <text x="490" y="432" font-size="11.5" fill="var(--tx2)">12:03:10 ▪ eng-2 begonnen aan 7.4</text>
+  <text x="490" y="452" font-size="11.5" fill="var(--tx2)">12:02:58 ▫ manager 7.4 uitgedeeld aan eng-2</text>
+  <text x="490" y="472" font-size="11.5" fill="var(--tx3)">12:02:31 ▫ eng-2 worktree opgewarmd (38 s)</text>
+</svg>
+<figcaption>Vijf vlakken: de balk met run en plafonds, het build plan met de aanwijsknop, de manager, de engineers naast elkaar, en onderaan de waarschuwingen naast het logboek. Elke regel draagt zijn bron.</figcaption>
+</figure>
+
+<h3>6.1 Techniek</h3>
+<ul>
+<li><b>Eén bestand, ingebouwde modules.</b> Zelfde vorm als <code>scripts/beheer-lokaal.mjs</code>: <code>node:http</code>, geen afhankelijkheden, geen build-stap. De pagina zit als tekst in het script.</li>
+<li><b>Duwen, niet trekken.</b> Een SSE-stroom op <code>/stroom</code> stuurt elke nieuwe logboekregel en elke tweede seconde een verse meting. Valt de verbinding weg, dan verbindt de pagina zichzelf opnieuw en haalt <code>/toestand.json</code> op om het gat te vullen.</li>
+<li><b>Alles loopt via één leeslaag.</b> Het scherm leest niet rechtstreeks van schijf maar door een dunne laag heen die de runmap, de graaf en het build plan ophaalt. Lokaal is dat het bestandssysteem; komt de toestand later in een bucket, dan verandert die laag en de rest van het scherm niet.</li>
+<li><b>De meter zit in hetzelfde proces.</b> Elke twee seconden per worktree: HEAD, aantal commits sinds de basis, gewijzigde bestanden, tijdstip van de laatste wijziging, en of er iets op de verbodslijst is geraakt. Read-only, en dat is niet vrijblijvend: een volgscherm dat in een worktree schrijft, verandert wat het meet.</li>
+<li><b>Alleen op <code>127.0.0.1</code>.</b> Geen inlog, geen bewaring, geen verzoeklog. Er staat repo-inhoud op het scherm.</li>
+<li><b>Buiten <code>design/</code>.</b> Dit is geen site maar een werkscherm, dus <code>make design-check</code> raakt het niet. Het leent de kleurvariabelen van de vier documenten zodat het in licht en donker klopt, en verder niets.</li>
+</ul>
+
+<h2 id="s7"><span class="n">7</span>Het build plan op het scherm, en aanwijzen</h2>
+
+<h3>7.1 Wat je ziet</h3>
+<p>De linkerkolom leest <code>BUILDPLAN.md</code> uit de hoofdmap, dus zoals hij in <code>main</code> staat, en zet elke subtaak in één van zes standen:</p>
+
+<table>
+<tr><th>Stand</th><th>Waar hij vandaan komt</th></tr>
+<tr><td><b>afgevinkt</b></td><td>Het vinkje staat in <code>BUILDPLAN.md</code>. Buiten de run om, en alleen door een mens gezet</td></tr>
+<tr><td><b>gemerged</b></td><td>Het logboek zegt dat de subtaak op de proefbranch staat. Nog geen vinkje, en dat blijft zo</td></tr>
+<tr><td><b>uitgedeeld</b></td><td>Bij een engineer, met zijn naam erbij</td></tr>
+<tr><td><b>vrij</b></td><td>Alle afhankelijkheden zijn gemerged. Dit is de enige stand met een aanwijsknop</td></tr>
+<tr><td><b>geblokkeerd</b></td><td>Wacht op iets. Het scherm noemt waaróp, want een grijze regel zonder reden nodigt uit om hem te negeren</td></tr>
+<tr><td><b>uitgesloten</b></td><td>Valt buiten de opzet van deze run</td></tr>
+</table>
+
+<p>De reden bij <i>geblokkeerd</i> is geen versiering. Subtaak 7.3 vereist 6.18 tot en met 6.21, en dat staat in het build plan zelf; de PRD gebruikt hem als de val waar een slecht lezende manager in stapt. Op het scherm hoort te staan <i>wacht op 6.21</i>, zodat jij hem niet aanwijst en de manager hem niet uitdeelt.</p>
+
+<h3>7.2 Wat aanwijzen doet</h3>
+<p>Een druk op <b>aanwijzen</b> stuurt een bericht naar het scherm-programma, dat <code>aanwijzing.json</code> herschrijft. De manager leest dat bestand aan het begin van elke ronde, vóór hij zelf iets kiest.</p>
+
+<pre><code>{"volgorde":["7.5","7.6"],"uitgesloten":["7.3"],"stop":false,
+ "gezet":"2026-08-30T12:06:20+02:00"}</code></pre>
+
+<p>Drie regels eromheen, en ze zijn geen van drieën onderhandelbaar:</p>
+<ul>
+<li><b>Een aanwijzing is een voorrangsregel, geen bevel.</b> Een graaf die overstemd kan worden is geen graaf, dus <code>deel_uit</code> weigert een subtaak die niet vrij is en schrijft de reden in het logboek. <b>Bijgesteld 30-08-2026 naar wat er gebouwd is:</b> hier stond dat de manager een aangewezen geblokkeerde subtaak vooraan zou zetten tot het kan. Het scherm biedt die handeling niet aan — de aanwijsknop verschijnt alleen bij een vrije subtaak — dus die situatie kan via de UI niet ontstaan. De weigering in <code>deel_uit</code> blijft staan als vangnet voor de andere weg naar binnen: <code>aanwijzing.json</code> met de hand bewerken.</li>
+<li><b>De volgorde die jij zet, wint van de volgorde die de manager zou kiezen.</b> Binnen wat mag, kiest jouw lijst. Het paper laat zien dat juist die keuze het verschil van 8,7% tegen 34,3% maakte.</li>
+<li><b>Wat de manager met een aanwijzing doet, gaat het logboek in.</b> Overgenomen of uitgesteld, met reden. Anders is achteraf niet te zien of de stuurknop iets deed.</li>
+</ul>
+
+<div class="card note">
+<p style="margin:0"><b>Toegevoegd 30-08-2026: het scherm start ook een ronde.</b> Aanwijzen alleen leverde een dood moment op — de aanwijzing stond in het logboek en er gebeurde niets, want de manager draait niet uit zichzelf. Dat is het ontwerp en het was op het scherm niet te zien. Er staat nu een knop <b>Volgende ronde starten</b>, en zolang er geen ronde is gedraaid zegt het managervlak letterlijk dat hij in ronden werkt. Wie iets aanwijst en niets ziet gebeuren, denkt dat het kapot is.</p>
+<p style="margin:.6em 0 0"><b>Eén ding kan het scherm niet.</b> Het kan een engineer niet halverwege omdraaien. Die draait als achtergrondtaak zijn opdracht af; <b>stop</b> breekt hem af, en dat is de enige knop die tijdens zijn werk bij hem aankomt. Wil je hem iets ánders laten doen, dan is dat afbreken en opnieuw uitdelen, en dat kost wat hij tot dan toe deed.</p>
+</div>
+
+<h2 id="s8"><span class="n">8</span>Waarschuwingen en alarmen</h2>
+
+<p>Twee niveaus. Een <b>waarschuwing</b> kleurt het scherm en wacht op jou. Een <b>alarm</b> breekt de run af en wekt de manager via de bewaking, ook als je niet kijkt.</p>
+
+<table>
+<tr><th>Signaal</th><th>Niveau</th><th>Uit welke bron</th><th>Drempel</th></tr>
+<tr><td>Verboden bestand geraakt</td><td><b>alarm</b></td><td>gemeten, in de worktree én nog eens vóór de merge</td><td>één treffer, G1</td></tr>
+<tr><td>Groene commit op een rode toets</td><td><b>alarm</b></td><td>gemeld rood, daarna gemeten commit</td><td>één keer</td></tr>
+<tr><td>Kostenplafond bereikt</td><td><b>alarm</b></td><td>gemeld door de manager na elke agent</td><td>100% van het plafond, G4</td></tr>
+<tr><td>Drie mislukte merges op dezelfde branch</td><td><b>alarm</b></td><td>gemeten</td><td>drie, W9</td></tr>
+<tr><td>Engineer stil</td><td>waarschuwing</td><td>geen gemeten wijziging, geen melding</td><td>10 min, instelbaar</td></tr>
+<tr><td>Meldt zonder te werken</td><td>waarschuwing</td><td>drie meldingen zonder gemeten wijziging</td><td>drie</td></tr>
+<tr><td>Kosten boven 80%</td><td>waarschuwing</td><td>gemeld door de manager</td><td>80% van het plafond</td></tr>
+<tr><td>Merge-conflict</td><td>waarschuwing</td><td>gemeten</td><td>elke keer; de engineer lost hem zelf op</td></tr>
+</table>
+
+<div class="card note bad">
+<p style="margin:0"><b>Vier van deze acht zijn gebouwd</b> (nagemeten 30-08-2026). Het scherm kent: <i>engineer stil</i>, <i>meldt zonder te werken</i>, <i>commit ná een rode toets</i>, en <i>de ronde staat stil</i> — die laatste staat niet in de tabel hierboven en kwam er bij toen een ronde vijf minuten bleef hangen. De verbodstreffer en het alarm komen rechtstreeks uit het logboek en niet uit deze lijst. <b>Niet gebouwd:</b> kostenplafond en de 80%-grens (er is nog geen plafond, P1), drie mislukte merges op dezelfde branch, en het merge-conflict als zichtbaar signaal. Wie "acht waarschuwingen" citeert, citeert de tabel en niet het scherm.</p>
+</div>
+
+<p>De bewaking naar de manager is smal gehouden: alleen alarmen en klaarmeldingen. Een bewaking die elke voortgangsregel doorgeeft, vult het gesprek met ruis en dwingt een ronde af voor iets wat op het scherm al zichtbaar was.</p>
+
+<div class="card note bad">
+<p style="margin:0"><b>Stilte is geen goed nieuws.</b> Een bewaking die alleen op succes let, zwijgt precies even hard bij een vastgelopen agent als bij een geslaagde. De filters hierboven vangen daarom elke eindstand: klaar, afgebroken, vastgelopen, en stil.</p>
+</div>
+
+<h2 id="s9"><span class="n">9</span>De config als enige bron</h2>
+
+<p><code>werkwijze/config.json</code> is voor deze proef wat <code>design/taalregels.json</code> is voor de taal: één machineleesbaar bestand dat zowel de manager als het volgscherm leest. Twee kopieën van de verbodslijst zouden betekenen dat het scherm iets anders bewaakt dan de manager afdwingt, en dan bewaakt niemand iets.</p>
+
+<pre><code>{
+  "engineers": 2,
+  "poort": 8788,
+  "basisbranch": "proef/fase7-caid",
+  "stiltedrempel_min": 10,
+  "meldingen_zonder_werk": 3,
+  "kostenplafond": null,
+
+  "verboden":  ["BUILDPLAN.md", "CLAUDE.md", "plinkie-*.html", "design/**",
+                "Makefile", "plinkie.code-workspace", "db/duckdb/**",
+                "werkwijze/**", "scripts/werkwijze/**"],
+  "exclusief": ["services/shared/**"],
+
+  "toetsen": { "services/**": ["make test", "make lint"],
+               "apps/**":     ["make web-test"],
+               "infra/**":    ["make tf-validate"] },
+
+  "steekproef": [ ... 18 gevallen, zie het bestand ... ]
+}</code></pre>
+
+<p>Elk patroon draagt in het bestand een eigen <code>waarom</code>. Die tekst komt op het scherm te staan bij een alarm, zodat er niet alleen staat <i>dit mocht niet</i> maar ook waarom niet.</p>
+
+<p><b>De <code>steekproef</code> is wat één bron ook echt één bron houdt.</b> Twee lezers gaan deze lijst gebruiken, de manager in Python en het volgscherm in node, en twee implementaties van dezelfde glob lopen uiteen zonder dat iemand het merkt. De tabel bevat de gevallen die ze allebei moeten reproduceren, en de <b>niet</b>-treffers wegen daarin het zwaarst: <code>services/watchdog/BUILDPLAN.md</code> is vrij, <code>mijn-plinkie-notities.html</code> is vrij, en <code>services/design/kleuren.css</code> ook. Een te breed patroon breekt een run af op werk dat gewoon mocht, en dat kost evenveel als een verbod dat niet pakt. Dezelfde truc staat in <code>design/taalregels.json</code>, om dezelfde reden.</p>
+
+<p>Daaruit volgt één regel voor de matcher: <code>*</code> en <code>?</code> blijven binnen één padsegment, alleen <code>**</code> kruist mappen, en elk patroon is verankerd in de wortel. De ingebouwde <code>fnmatch</code> van Python doet dat níét — daar loopt <code>*</code> over <code>/</code> heen, en dan vangt <code>plinkie-*.html</code> ook <code>ideeen/plinkie-manifesto.html</code>.</p>
+
+<p><code>kostenplafond</code> staat op <code>null</code> tot arm A gedraaid is; die run levert het getal waar het plafond een veelvoud van is (O2 uit de PRD). Zolang het <code>null</code> is, weigert de manager arm B te starten. Een plafond dat nog niet bekend is, is geen plafond.</p>
+
+<h2 id="s10"><span class="n">10</span>Uitdelen, toetsen, mergen</h2>
+
+<h3>10.1 De opdracht, en de engineer als rol</h3>
+<p>Elke engineer krijgt dezelfde structuur: de subtaak woordelijk uit <code>BUILDPLAN.md</code>, zijn werkplek, de services in scope, het toetscommando, de verbodslijst, wat er al gemerged is, en hoe hij meldt. Geen vrij gesprek, en geen samenvatting van het build plan in eigen woorden; wat er staat gaat er letterlijk in, want een hertelling van de opdracht is een tweede versie van de waarheid.</p>
+
+<p><b>Die structuur is tegelijk de interface, en daarmee is de engineer net als de manager een rol met meer dan één bezetting.</b> Wat de manager van een engineer nodig heeft is klein:</p>
+
+<table>
+<tr><th>De manager geeft</th><th>De manager krijgt terug</th></tr>
+<tr><td>De opdracht als tekst, de startbranch, de verbodslijst en het toetscommando</td><td>Een branch met commits, een stroom voortgangsmeldingen, en een eindsignaal (klaar, vastgelopen, afgebroken)</td></tr>
+</table>
+
+<table>
+<tr><th></th><th>Bezetting 1 — lokale agent</th><th>Bezetting 2 — Jules-sessie</th></tr>
+<tr><td>Isolatie</td><td><code>git worktree</code> onder <code>.claude/worktrees/</code></td><td>een eigen VM per sessie, door de dienst geleverd</td></tr>
+<tr><td>Startbranch</td><td>de worktree wordt eruit afgeleid</td><td><code>sourceContext.githubRepoContext.startingBranch</code></td></tr>
+<tr><td>Voortgang</td><td>wat hij zelf meldt via het hulpstuk uit C3</td><td>de activiteitenstroom van de sessie, met shell-uitvoer en changesets erin</td></tr>
+<tr><td>Oplevering</td><td>commits op zijn branch</td><td>een branch, desgewenst met een pull request</td></tr>
+<tr><td>Bijsturen tijdens het werk</td><td>afbreken en opnieuw uitdelen</td><td>een bericht naar de lopende sessie</td></tr>
+<tr><td>Waar het werk staat</td><td>lokaal, hoeft niet gepusht</td><td>op de GitHub-remote, dus de proefbranch moet daarheen</td></tr>
+</table>
+
+<p>Run 1 gebruikt bezetting 1. De interface hierboven is er zodat bezetting 2 later geen herbouw is.</p>
+
+<h3>10.2 Toetsen gebeurt twee keer, en dat is geen dubbelop</h3>
+<p>De engineer toetst zijn eigen branch vóór hij commit. De manager toetst <b>opnieuw</b> na de merge, op de proefbranch. Twee branches die elk groen zijn, kunnen samen rood zijn, en die vraag stelt alleen de merge. Het paper laat de engineer toetsen en de manager de merge doen; de retest erbij is een toevoeging van dit ontwerp, en G2 uit de PRD hangt eraan.</p>
+<p>Is de retest rood, dan gaat de merge terug (<code>git reset --hard</code> naar de vorige stand van de proefbranch) en krijgt de engineer die als laatste merget de fout terug, met de uitvoer erbij. De manager repareert niet zelf: dan schrijft hij code die niemand heeft getoetst.</p>
+
+<h3>10.3 Conflicten</h3>
+<p>De engineer die het conflict veroorzaakte, haalt de proefbranch binnen in zijn eigen worktree, lost het daar op en commit opnieuw. Dat is de regel uit het paper, en hij heeft hier een tweede grond: de manager draait in ronden en kan niet halverwege een conflict blijven staan.</p>
+
+<h2 id="s11"><span class="n">11</span>Administratie, noodrem, opruimen</h2>
+
+<h3>11.1 Na elke geslaagde merge</h3>
+<ol>
+<li>Eén logregel in het Tijdlogboek van <code>BUILDPLAN.md</code>, op de proefbranch, met het aantal engineers en de kosten erin (O1 uit de PRD).</li>
+<li>Het lopend totaal opnieuw optellen uit de tabel, niet erbij optellen. Dat is letterlijk de reparatie die op 28-08-2026 met de hand nodig was.</li>
+<li>Geen vinkje. Nooit.</li>
+</ol>
+
+<h3>11.2 Noodrem</h3>
+<p>De run stopt bij een alarm, bij een druk op <b>stop</b>, of wanneer de manager wordt onderbroken. Stoppen betekent: alle lopende engineers afbreken, de laatste stand van elke branch laten staan, en het meetblad schrijven met de reden erin. Er wordt niets teruggedraaid, want een halve run is ook een waarneming.</p>
+
+<h3>11.3 Opruimen</h3>
+<p>Worktrees gaan weg met <code>git worktree remove</code>; de branches blijven staan tot jij ze weggooit. De runmap blijft op schijf, en alleen het meetblad gaat de commit in.</p>
+
+<h2 id="s11b"><span class="n">11b</span>De weg naar Gemini Enterprise Agent Platform</h2>
+<p class="sub">De bestemming is Google. Deze sectie zegt wat er meeverhuist, wat het Agent Platform overneemt, en waar het gat zit. Run 1 draait lokaal; hier staat waarvoor we alvast betalen.</p>
+
+<h3>11b.1 Wat het Agent Platform overneemt van wat hier ontworpen is</h3>
+<table>
+<tr><th>Wat wij bouwen</th><th>Wat het Agent Platform ervoor heeft</th><th>Gevolg</th></tr>
+<tr><td>Wie deed wat, betrouwbaar</td><td><b>Agent Identity</b> — elke agent een eigen cryptografische ID voor herleidbaarheid en audit</td><td>Sterker dan onze aanpak. De verbodslijst wordt dan niet gehandhaafd op vertrouwen maar op identiteit, en dat sluit aan op de bestaande regel van dit project: een eigen service-account per job</td></tr>
+<tr><td>Het volgscherm</td><td><b>Agent Observability</b> — realtime zicht op werking, veiligheid en prestaties</td><td>Overlapt met &sect;6. Wat het niet kent is óns begrip van een subtaak en van het build plan, dus de linkerkolom en de aanwijsknop blijven eigen werk</td></tr>
+<tr><td>De overdracht en <code>graaf.json</code></td><td><b>Memory Bank</b> — langetermijngeheugen over sessies heen</td><td>Kandidaat om de overdracht te dragen. De lijst uit &sect;4.4 blijft nodig, want die zegt wát er onthouden moet worden</td></tr>
+<tr><td>De droogloop (C14)</td><td><b>Agent Simulation</b> — agenten stresstesten tegen echte scenario's vóór ze live gaan</td><td>Zelfde gedachte. Onze droogloop toetst het scherm en de gates, en dat blijft nodig</td></tr>
+<tr><td>Uitdelen aan engineers</td><td><b>ADK</b> als graafgebaseerd raamwerk met een netwerk van subagenten, plus <b>A2A</b>-delegatie</td><td>De managerlus past hier goed op. Het denkwerk verandert niet</td></tr>
+<tr><td>De manager als ronde</td><td><b>Agent Runtime</b> — agenten die zowel snel als blijvend zijn</td><td>Een blijvende runtime heft de beperking uit &sect;2.4 op. De rol blijft hetzelfde geschreven; alleen de wekker vervalt</td></tr>
+<tr><td>—</td><td><b>Model Armor</b> — prompt-injectie, gereedschapsvergiftiging en datalekken</td><td>Verdient zijn plek zodra een agent shell-opdrachten in een repo mag draaien, en dat is het oppervlak waar deze proef om draait</td></tr>
+</table>
+
+<div class="card note bad">
+<p style="margin:0"><b>Het gat zit bij de engineer, en niet bij de manager.</b> De aangehaalde documentatie beschrijft orkestratie, bestuur, geheugen en beveiliging, en noemt <b>geen uitvoering van code of shell-opdrachten</b> en niets over agenten die op een codebase werken. De manager is boekhouding plus een beslissing en past goed op dit platform; de engineer is een volwaardige codeagent die bestanden wijzigt, <code>make test</code> draait, tracebacks leest en merge-conflicten oplost. Het paper kreeg die laag kant en klaar van de OpenHands-SDK (v1.11.0). Op Google moet die laag meegebracht of gebouwd worden: een container met de repo, <code>git</code>, <code>uv</code> en node, en een agent met gereedschappen die daarin mogen werken. <b>Dat is het grootste onbekende deel van de verhuizing, en het is de omgekeerde kant van wat je zou verwachten.</b></p>
+</div>
+
+<p><b>CodeMender komt in de buurt en sluit het gat niet</b> (nagelopen 30-08-2026). Het is een agent van Google DeepMind, aangekondigd in oktober 2025 en inmiddels een product van Google Cloud met een eigen CLI onder deze documentatie. Hij redeneert over code met debuggers, statische analyse en een codebrowser, schrijft een patch en toetst die zelf met tests en een tweede model; in het eerste halfjaar leverde hij 72 beveiligingspatches op projecten tot 4,5 miljoen regels, en elke patch ging langs een mens voordat hij werd ingediend.</p>
+<p>Dat is <b>het bewijs dat het gereedschap binnen Google bestaat</b> — precies de gereedschapskist die een engineer nodig heeft. Het is alleen op een andere taak gezet: kwetsbaarheden vinden en repareren, niet een subtaak uit een build plan bouwen. P5 wordt er dus smaller van en gaat niet dicht. Wat hier wél uit te lenen valt is zijn werkwijze, en die staat dicht bij de onze: zelf toetsen vóór indienen, en een mens vóór de laatste stap.</p>
+
+<h3>11b.3 Jules als engineer <span class="tag p1">nagelopen 30-08-2026</span></h3>
+<p><b>Google Jules</b> is een codeagent met een REST-API in alpha. Hij draait op drie begrippen die vrijwel één op één op onze rol passen:</p>
+<ul>
+<li><b>Source</b> — een GitHub-repository, aangesloten via de Jules-app. Dit project staat op <code>businessdatasolutions/plinkie</code>, dus die voorwaarde is al vervuld.</li>
+<li><b>Session</b> — één eenheid werk met een <code>prompt</code>, met <code>sourceContext.githubRepoContext.startingBranch</code> om de startbranch te kiezen, en met <code>outputs</code> waarin het resultaat als pull request terugkomt. <code>requirePlanApproval</code> laat de agent eerst een plan voorleggen; <code>automationMode</code> bepaalt of er vanzelf een pull request komt.</li>
+<li><b>Activity</b> — de voortgang binnen een sessie, met soorten als <code>planGenerated</code>, <code>progressUpdated</code> en <code>sessionCompleted</code>, en met <code>artifacts</code> waarin shell-uitvoer en changesets zitten. Op te halen met <code>GET /v1alpha/sessions/&lt;id&gt;/activities</code>.</li>
+</ul>
+
+<p><b>Twee dingen krijgen we er gratis bij die dit ontwerp zelf niet had.</b> <code>requirePlanApproval</code> is de strengere variant uit het paper (&sect;4.4 daar: de manager leest elke ronde mee, 60,2% tegen 55,1%) zonder dat wij hem hoeven te bouwen. En <code>sendMessage</code> repareert de beperking uit &sect;7.2: een lopende engineer was alleen af te breken, en kan nu een bericht krijgen.</p>
+
+<p>De activiteitenstroom is bovendien rijker dan wat een agent uit zichzelf zou melden. Het onderscheid uit &sect;5 blijft precies zoals het is: <b>activiteiten zijn gemeld</b>, de branch in git is <b>gemeten</b>.</p>
+
+<div class="card note">
+<p style="margin:0"><b>Drie voorwaarden, en één ervan raakt de opzet van de proef.</b> <b>(1)</b> De API staat als <i>alpha</i> aangemerkt en de specificatie kan wijzigen; hoogstens drie sleutels per account. <b>(2)</b> Jules werkt op de GitHub-remote, dus de proefbranch moet gepusht worden. Een run die volledig lokaal blijft, kan geen Jules-engineers hebben. <b>(3)</b> Dat pushen is nagelopen en veilig: alle zes de Cloud Build-triggers in <code>infra/</code> staan op <code>^main$</code> voor staging en <code>^v.*$</code> voor productie, dus een branch <code>proef/…</code> zet geen enkele bouw of uitrol in gang (gemeten 30-08-2026).</p>
+</div>
+
+<p>Wat níét is nagelopen zijn de genoemde eigenschappen van de ingebouwde sandbox van het Agent Platform: opstarttijd, een grens van 100 MB aan bestandsverkeer, en een bewaartermijn tot veertien dagen. Die staan hier als onbevestigd en horen niet in een besluit voordat ze uit de documentatie zelf komen.</p>
+
+<h3>11b.2 Wat er daarnaast verandert</h3>
+<table>
+<tr><th>Onderdeel</th><th>Lokaal</th><th>Op het Agent Platform</th></tr>
+<tr><td>Wekker</td><td>jij typt, plus een <code>Monitor</code> over het logboek</td><td>een tijdschakelaar of een gebeurtenis, of geen wekker bij een blijvende runtime</td></tr>
+<tr><td>Toestand</td><td><code>werkwijze/runs/…</code> op schijf</td><td>een bucket of Memory Bank, langs de leeslaag uit &sect;6.1. Zelfde regel als de nachtrun: toestand leeft buiten de job</td></tr>
+<tr><td>Worktrees</td><td><code>.claude/worktrees/</code></td><td>vluchtige schijf in de container, opnieuw te maken uit de branches</td></tr>
+<tr><td>Volgscherm</td><td>node op <code>127.0.0.1</code></td><td>een dienst zonder publieke ingang, bereikbaar met jouw identiteitstoken. Dezelfde vorm als de beheer-service, en om dezelfde reden: er staat repo-inhoud op</td></tr>
+<tr><td>Kosten per ronde</td><td>warme context</td><td>elke ronde begint koud en leest zich in. Hoeveel dat scheelt, weten we pas na run 1</td></tr>
+</table>
+
+<div class="card note">
+<p style="margin:0"><b>Twee waarschuwingen die met dit project zelf te maken hebben.</b> <b>(1)</b> Dit repository draagt al ADK, in de beoordelaar (4.3b) en de speurder (4b.19), met een gepinde major als eenrichtingsdeur. Het aangekondigde graafgebaseerde raamwerk is mogelijk een andere lijn. <b>De proef mag de pin van het product niet meeslepen</b>; de werkwijze-agenten staan buiten de nachtrun-image, net als die twee, en die scheiding blijft. <b>(2)</b> Zodra niemand meekijkt, is de aanwijsknop een bestand dat op een bucket ligt en dat niemand indrukt. Het paper wijst de delegatiekeuze aan als de sterkste hefboom op de uitkomst; in de cloud is die hefboom alleen bezet als je hem zelf bezet.</p>
+</div>
+
+<h2 id="s12"><span class="n">12</span>Wat we bewust niet bouwen</h2>
+<ul>
+<li><b>Geen eigen orkestratielaag.</b> Wat het harnas al kan aan achtergrondagenten, worktrees en bewaking bouwen we niet na. Wat we wél zelf schrijven is het logboek, de meter en het scherm, omdat het harnas die niet levert.</li>
+<li><b>Geen bewaring buiten de runmap.</b> Geen database, geen dienst in de cloud, niets dat blijft draaien als je het scherm sluit.</li>
+<li><b>Geen ingang van buiten <code>127.0.0.1</code>.</b> Er staat repo-inhoud op het scherm en er is geen inlog.</li>
+<li><b>Geen automatische stap naar <code>main</code>.</b> Ook niet bij vijf groene gates.</li>
+<li><b>Geen tweede meting van dezelfde subtaak binnen één run.</b> De vergelijking tussen arm A en arm B gebeurt tussen runs, en het scherm rekent niets uit dat op een score lijkt.</li>
+</ul>
+
+<h2 id="s13"><span class="n">13</span>Draaiboek C1–C15</h2>
+<p class="sub">Volgorde is van boven naar beneden. <span class="tag p0">gate</span> markeert een stap die de rest blokkeert.</p>
+
+<div class="taak"><h4><span class="box klaar">☑</span> C1 · <code>werkwijze/config.json</code> met de verbodslijst en de toetsen <span class="tag p0">af 30-08-2026</span></h4>
+<p><code>werkwijze/config.json</code> met achttien steekproefgevallen, en <code>scripts/werkwijze/config.py</code> met een eigen matcher, drie standen (<code>verboden</code>, <code>exclusief</code>, <code>vrij</code>), de toetscommando's per werkgebied en een zelftest. Draait zonder venv op de systeem-python, net als de andere controles in <code>scripts/</code>. Doel: <code>make werkwijze-test</code>.</p>
+<p>De afloopcode maakt hem meteen bruikbaar als de poort van C10: <code>2</code> zodra één pad verboden is. Daarmee is <code>git diff --name-only … | config.py --stand -</code> de hele controle.</p>
+<p class="klaar"><b>Klaar:</b> 18/18 steekproefgevallen goed. <b>Wat de bouw opleverde:</b> de tegenspraak tussen PRD &sect;5 en &sect;9 hierboven, en een ontbrekend pad — de proef kon zijn eigen regels wijzigen.</p></div>
+
+<div class="taak"><h4><span class="box klaar">☑</span> C1b · <code>graaf.json</code> als bestand <span class="tag p0">af 30-08-2026</span></h4>
+<p><code>scripts/werkwijze/graaf.py</code>: bouwen uit <code>opzet.json</code> plus <code>BUILDPLAN.md</code>, tonen, en een stand zetten. De stand wordt <b>afgeleid</b> en niet opgeslagen — opgeslagen worden de feiten (het vinkje, de randen, de runstand per subtaak), zodat er geen stand kan verouderen.</p>
+<p><b>Wat de bouw opleverde, en het is de belangrijkste vondst tot nu toe:</b> in heel <code>BUILDPLAN.md</code> schrijft precies één subtaak zijn afhankelijkheid uit in leesbare vorm. De randen komen daarom uit de opzet, met de hand, en de bouwer <b>weigert een opzet waarin een subtaak ontbreekt</b> — een lege lijst betekent "nagelopen en onafhankelijk", ontbreken betekent "niemand heeft gekeken", en dat zijn twee verschillende dingen.</p>
+<p><b>De acceptatie-eis hierboven was fout</b> en luidde: na een gesimuleerde merge verandert de stand van precies één subtaak. Dat is onjuist zodra de graaf werkt. Een merge verandert de gemergede subtaak <i>plus</i> elke subtaak waarvan hij de laatste tegenhouder was; alleen een merge die niets deblokkeert raakt er één, en dat is het onbelangrijke geval.</p>
+<p class="klaar"><b>Klaar:</b> 15/15 controles. De val uit PRD &sect;8.1 staat in de graaf met 6.18 t/m 6.21 als tegenhouder buiten bereik, en blijft geblokkeerd ook als de hele fase gemerged is. Controle 9 leest de echte tekst van het build plan: verdwijnt die zin, dan wordt de zelftest rood.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C2 · De runmap en het logboekformaat</h4>
+<p><code>werkwijze/runs/&lt;datum&gt;-&lt;volgnummer&gt;/</code> met <code>opzet.json</code>, <code>gebeurtenissen.jsonl</code> en <code>aanwijzing.json</code>. Append-only, één regel per gebeurtenis, velden uit &sect;5.</p>
+<p class="klaar"><b>Klaar wanneer:</b> een regel wegschrijven en teruglezen werkt, en een halve regel aan het eind van het bestand het lezen niet omvergooit.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C3 · Het meldhulpstuk voor engineers</h4>
+<p><code>scripts/werkwijze/meld.py</code>: één aanroep, geen afhankelijkheden, schrijft één regel met <code>bron: "gemeld"</code>. Kort genoeg om in de opdracht te passen, want een engineer die drie regels moet onthouden om te melden, meldt niet.</p>
+<p class="klaar"><b>Klaar wanneer:</b> <code>meld.py eng-1 toets "make test groen" --uitslag groen</code> een geldige regel oplevert, ook bij gelijktijdig schrijven vanuit twee processen.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C4 · De meter</h4>
+<p>Leest per worktree de git-toestand: HEAD, commits sinds de basis, gewijzigde bestanden, tijdstip van de laatste wijziging, en treffers op de verbodslijst. Read-only, en hij schrijft alleen regels met <code>bron: "gemeten"</code>.</p>
+<p class="klaar"><b>Klaar wanneer:</b> een commit in een worktree binnen twee seconden als gemeten regel in het logboek staat.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C5 · Het volgscherm — server en pagina</h4>
+<p><code>scripts/volgscherm.mjs</code> plus het doel <code>make volgscherm</code>. Server op <code>127.0.0.1</code>, routes <code>/</code>, <code>/stroom</code> (SSE), <code>/toestand.json</code>. De indeling uit &sect;6, in de kleurvariabelen van dit document.</p>
+<p class="klaar"><b>Klaar wanneer:</b> het scherm de vijf vlakken toont, na een verbroken verbinding zichzelf herstelt, en in licht en donker klopt.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C6 · Het build plan in de linkerkolom</h4>
+<p>Lees <code>BUILDPLAN.md</code>, herken fasen en genummerde subtaken met hun vinkje, en bepaal per subtaak zijn stand uit &sect;7.1. De graaf en de standen komen kant en klaar uit C1b; het scherm rekent ze niet zelf uit, want dan zijn er twee antwoorden op dezelfde vraag.</p>
+<p class="klaar"><b>Klaar wanneer:</b> Fase 7 op het scherm staat met 7.3 als geblokkeerd én de reden erbij, zonder dat die reden met de hand is ingetypt.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C7 · Aanwijzen <span class="tag p1">stuurt</span></h4>
+<p>De knop bij een vrije subtaak, de lijst <b>Voorrang</b>, en het wegschrijven naar <code>aanwijzing.json</code>. Plus de leesregel aan de managerkant: bij elke ronde eerst dat bestand, dan pas de eigen keuze.</p>
+<p class="klaar"><b>Klaar wanneer:</b> een aanwijzing overleeft dat het scherm herstart, en een aanwijzing op een geblokkeerde subtaak wordt geweigerd met de reden op het scherm.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C8 · Waarschuwingen en alarmen</h4>
+<p>De acht signalen uit &sect;8, met de drempels uit de config. Alarmen krijgen een eigen kleur, blijven staan tot ze zijn gezien, en gaan het logboek in.</p>
+<p class="klaar"><b>Klaar wanneer:</b> elk van de acht in de droogloop van C14 minstens één keer is opgetreden en op het scherm verscheen.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C9 · Worktrees opzetten en opwarmen <span class="tag p0">gate</span></h4>
+<p><code>scripts/werkwijze/worktrees.sh</code>: aanmaken, opwarmen van alleen de services in scope, opruimen. Plus de regel <code>.claude/worktrees/</code> in <code>.gitignore</code>.</p>
+<p class="klaar"><b>Klaar wanneer:</b> twee worktrees bestaan, in elk daarvan <code>make test</code> groen draait, en de opwarmtijd als gemeten regel in het logboek staat.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C10 · De verbodslijstcontrole vóór de merge <span class="tag p0">gate</span></h4>
+<p>Vóór elke merge: <code>git diff --name-only</code> tussen basis en branch, langs de lijst uit C1. Eén treffer betekent afbreken, en niet corrigeren.</p>
+<p class="klaar"><b>Klaar wanneer:</b> een branch met een wijziging in <code>BUILDPLAN.md</code> wordt geweigerd, en een branch zonder die wijziging doorgelaten.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C11 · Merge en retest</h4>
+<p>Merge met <code>--no-ff</code>, daarna het toetscommando van de geraakte werkgebieden op de proefbranch. Rood betekent terugdraaien en teruggeven, met de uitvoer erbij.</p>
+<p class="klaar"><b>Klaar wanneer:</b> twee branches die apart groen zijn en samen rood, aantoonbaar leiden tot een teruggedraaide merge.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C12 · De administratiestap</h4>
+<p>Logregel schrijven en het lopend totaal opnieuw optellen uit de tabel. Met een controle die de som vergelijkt met de kop, zodat G5 tijdens de run al meet en niet pas achteraf.</p>
+<p class="klaar"><b>Klaar wanneer:</b> een kop die niet klopt met de som een alarm geeft.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C13 · Noodrem en opruimen</h4>
+<p>De <b>stop</b>-knop, het afbreken van lopende agenten, en <code>git worktree remove</code>. Branches blijven staan.</p>
+<p class="klaar"><b>Klaar wanneer:</b> stop tijdens twee lopende engineers binnen tien seconden alles stilzet en het meetblad wegschrijft.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C14 · De droogloop <span class="tag p0">gate</span></h4>
+<p><code>make werkwijze-proef</code>: twee neppe engineers, geen model en geen kosten, die zich als scripts gedragen zoals echte agenten dat zouden doen. Zie &sect;14.</p>
+<p class="klaar"><b>Klaar wanneer:</b> alle acht signalen uit &sect;8 zijn opgetreden en het scherm ze alle acht toonde.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C15 · Het meetblad</h4>
+<p>Aan het eind van een run: de maten uit PRD &sect;8.3 uit het logboek gehaald, plus de uitslag van elke gate. Eén bestand, in git.</p>
+<p class="klaar"><b>Klaar wanneer:</b> een afgeronde droogloop een leesbaar meetblad oplevert waarin geen getal met de hand is ingevuld.</p></div>
+
+<div class="taak"><h4><span class="box">☐</span> C16 · <code>manager.md</code> en de overdrachtstoets <span class="tag p0">gate</span></h4>
+<p>De rol als opdracht in een bestand (&sect;2.3), plus de leeslijst uit &sect;4.4. De toets is niet dat het bestand er staat maar dat de rol overdraagbaar is: breek de manager halverwege af, laat een tweede alleen die lijst lezen, en kijk of hij dezelfde volgende zet doet.</p>
+<p class="klaar"><b>Klaar wanneer:</b> die overname twee keer achter elkaar dezelfde zet oplevert. Lukt dat niet, dan zit er kennis in een hoofd in plaats van in een bestand, en is de stap naar de cloud niet gezet maar alleen opgeschreven.</p></div>
+
+<h2 id="s14"><span class="n">14</span>De droogloop als gate</h2>
+
+<p>Deze repo heeft er al een van: <code>make speurder-proef</code> draait de speurder over de echte bronnen zonder model en zonder kosten, en bewijst de vindlaag voordat er tokens aan opgaan. <code>make werkwijze-proef</code> doet hetzelfde voor de lus.</p>
+
+<p>Twee shell-scripts spelen engineer. Ze werken in echte worktrees, maken echte commits en draaien echte toetsen; alleen het denken ontbreekt. Ze zijn zo geschreven dat ze elk gedrag vertonen dat het scherm moet kunnen laten zien:</p>
+
+<table>
+<tr><th>Nep-engineer doet</th><th>Bewijst</th></tr>
+<tr><td>Commit met groene toets</td><td>De gelukkige weg, en de gemeten regel binnen twee seconden</td></tr>
+<tr><td>Meldt drie keer en wijzigt niets</td><td>De waarschuwing "meldt zonder te werken"</td></tr>
+<tr><td>Doet elf minuten niets</td><td>De stiltewaarschuwing, met de drempel uit de config</td></tr>
+<tr><td>Raakt <code>BUILDPLAN.md</code> aan</td><td>Het alarm van G1, en dat de run daadwerkelijk stopt</td></tr>
+<tr><td>Commit terwijl zijn toets rood is</td><td>Het alarm op een groene commit bij een rode toets</td></tr>
+<tr><td>Wijzigt dezelfde regel als de ander</td><td>Het conflict, en dat de veroorzaker hem oplost</td></tr>
+<tr><td>Twee groene branches die samen rood zijn</td><td>De retest uit C11, en de teruggedraaide merge</td></tr>
+<tr><td>De manager valt halverwege weg</td><td>De overdracht uit C16: een verse manager pakt de run op uit de leeslijst alleen</td></tr>
+</table>
+
+<div class="card note good">
+<p style="margin:0"><b>Pas als de droogloop groen is, mag er geld naar arm A.</b> Een scherm dat de proef moet meten, mag niet zelf ongemeten zijn; anders weten we bij een tegenvallende run niet of de werkwijze faalde of de meting. Dat is dezelfde grond waarop deze repo een testgate vóór een fase zet en niet erna.</p>
+</div>
+
+<h2 id="s15"><span class="n">15</span>Wat er in bestaande bestanden verandert</h2>
+
+<table>
+<tr><th>Bestand</th><th>Wijziging</th><th>Wanneer</th></tr>
+<tr><td><code>.gitignore</code></td><td><code>.claude/worktrees/</code> en <code>werkwijze/runs/*/</code> erin, met het meetblad uitgezonderd</td><td>Bij C2 en C9</td></tr>
+<tr><td><code>Makefile</code></td><td>Drie doelen: <code>werkwijze-test</code> (er sinds C1, draait nu twee zelftests), <code>volgscherm</code> en <code>werkwijze-proef</code>. Geen leeg doel dat stilzwijgend slaagt</td><td>C1 af; de rest bij C5 en C14</td></tr>
+<tr><td><code>CLAUDE.md</code></td><td>Eén rij in de documenthiërarchie voor <code>werkwijze/</code>, en de twee nieuwe doelen in de lijst met commando's</td><td>Bij goedkeuring van dit document</td></tr>
+<tr><td><code>plinkie.code-workspace</code></td><td>Niets. De worktrees zijn vluchtig en horen niet als vaste folder in de werkruimte</td><td>—</td></tr>
+<tr><td><code>BUILDPLAN.md</code></td><td>Niets. De proef is geen fase van Plinkie en krijgt daar geen nummer. Alleen de logregels per commit gaan er zoals altijd in</td><td>—</td></tr>
+</table>
+
+<p>Die laatste rij is een besluit en geen verzuim. Dit draaiboek in het build plan zetten zou de proef status geven binnen het product, en dan telt hij mee in een fase die er niets mee te maken heeft.</p>
+
+<h2 id="s16"><span class="n">16</span>Open punten</h2>
+
+<table>
+<tr><th></th><th>Punt</th><th>Stand</th></tr>
+<tr><td><b>P1</b></td><td>Het kostenplafond (O2 uit de PRD)</td><td>Blijft <code>null</code> tot arm A gedraaid is. De manager weigert arm B zolang het leeg is</td></tr>
+<tr><td><b>P2</b></td><td>Hoe fijn de meter een lopende agent kan volgen</td><td>Git en het bestandssysteem geven commits en wijzigingen. Hoe vér een agent in zijn opdracht is, weet alleen hij; daarom staat de voortgangsbalk op zijn eigen melding en draagt hij het meldteken</td></tr>
+<tr><td><b>P3</b></td><td>Twee sessies tegelijk in deze repo</td><td>Dat gebeurt vaker dan gedacht (22-08 en 28-08-2026). Een tweede manager naast deze zou beide administraties laten schrijven. Voorlopig: één run tegelijk, en de runmap draagt het volgnummer dat dat zichtbaar maakt</td></tr>
+<tr><td><b>P4</b></td><td>Wat er met arm A gebeurt als arm B eerder klaar is</td><td>Arm A draait eerst en helemaal, juist omdat zijn kosten het plafond van arm B bepalen</td></tr>
+<tr><td><b>P5</b></td><td>De engineerlaag (&sect;11b.3)</td><td><b>Grotendeels dicht sinds 30-08-2026.</b> Jules levert de laag als dienst, met een API die op onze rol past en met de repo al op GitHub. Wat rest is de alpha-status van die API en de vraag wat een sessie kost</td></tr>
+<tr><td><b>P8</b></td><td>Wat een Jules-sessie kost, en hoe dat zich verhoudt tot een lokale engineer</td><td>Onbekend. Het raakt G4 rechtstreeks, want het kostenplafond is een veelvoud van arm A. Meten vóór een run met bezetting 2</td></tr>
+<tr><td><b>P9</b></td><td>De proefbranch op de remote</td><td>Bezetting 2 vereist pushen naar GitHub. Dat is veilig gebleken voor de triggers, maar het betekent wel dat proefbranches zichtbaar worden in de repo van het project. Opruimen hoort dan bij het einde van de run</td></tr>
+<tr><td><b>P6</b></td><td>Welke ADK-lijn de werkwijze gebruikt</td><td>Het product pint een major als eenrichtingsdeur. De werkwijze-agenten staan buiten de nachtrun-image en houden een eigen lijn; die scheiding moet bij de bouw hard zijn en niet per ongeluk</td></tr>
+<tr><td><b>P7</b></td><td>De cloudvorm zelf</td><td>Bestemming is Gemini Enterprise Agent Platform; of de manager daar een blijvende runtime krijgt of per ronde gewekt wordt, is open. De rol is voor allebei geschreven</td></tr>
+</table>
+
+<footer>
+Technisch ontwerp — CAID op deze repo · versie 1.4 · 30 augustus 2026 · eigenaar Witek<br>
+Hoort bij <a href="caid-prd.html">de PRD</a> (v1.0) en bij <a href="../research/geng-neubig-2026-caid-asynchrone-swe-agents.pdf">het paper van Geng &amp; Neubig</a>.<br>
+Dit document beschrijft de werkwijze en verandert geen productbelofte. Bij tegenspraak over Plinkie wint <code>plinkie-blueprint-gcp.html</code>.
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRD — CAID op deze repo · v1.2 · 30 augustus 2026</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --tx:#e8eaed; --tx2:#a2a9b6; --tx3:#6f7784;
+    --acc:#4da3ff; --good:#3ecf8e; --warn:#f5b544; --bad:#f2666b;
+    --chip:#232833; --pro:#3ecf8e; --con:#f2666b;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7f9; --panel:#ffffff; --panel2:#f0f2f5; --line:#e0e4ea;
+      --tx:#161a20; --tx2:#5b6472; --tx3:#8b94a3;
+      --acc:#0b6bcb; --good:#0e8a57; --warn:#9a6a06; --bad:#c02b32;
+      --chip:#eef1f5; --pro:#0e8a57; --con:#c02b32;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:24px 16px 100px}
+  h1{font-size:26px;line-height:1.2;margin:0 0 4px;letter-spacing:-.02em}
+  h2{font-size:20px;margin:44px 0 12px;letter-spacing:-.01em;padding-top:14px;border-top:2px solid var(--line)}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:16px;margin:24px 0 8px}
+  h4{margin:18px 0 6px;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+  p{margin:8px 0}
+  .sub{color:var(--tx2);font-size:14px;margin:0 0 6px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px}
+  .meta span{background:var(--chip);border:1px solid var(--line);border-radius:999px;
+    padding:4px 12px;font-size:12.5px;color:var(--tx2)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .note{border-left:3px solid var(--warn)}
+  .note.good{border-left-color:var(--good)}
+  .note.bad{border-left-color:var(--bad)}
+  .note.acc{border-left-color:var(--acc)}
+  ul,ol{margin:8px 0;padding-left:20px}
+  li{margin:5px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0}
+  th{text-align:left;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--tx3);font-weight:600;padding:8px;border-bottom:1px solid var(--line)}
+  td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  a{color:var(--acc)}
+  code{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px}
+  .tag{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:999px;
+    border:1px solid var(--line);background:var(--chip);color:var(--tx2);margin-right:4px;vertical-align:middle}
+  .tag.p0{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,transparent)}
+  .tag.p1{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 40%,transparent)}
+  .tag.p2{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+  .toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:2px 14px}
+  .toc a{display:block;padding:3px 0;font-size:13.5px;text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  figure{margin:18px 0}
+  figcaption{color:var(--tx2);font-size:12.5px;margin-top:8px}
+  svg{max-width:100%;height:auto;display:block}
+  .win{color:var(--good);font-variant-numeric:tabular-nums}
+  .verlies{color:var(--bad);font-variant-numeric:tabular-nums}
+  footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);color:var(--tx3);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>PRD — CAID op deze repo</h1>
+<p class="sub">Kunnen meerdere agenten tegelijk aan Plinkie werken, elk in een eigen worktree, met de merge als enige toegangspoort? Dit document beschrijft de proef, wat hij moet uitwijzen, en wanneer hij mislukt is.</p>
+<div class="meta">
+  <span>Versie 1.2 — vervangt v1.1</span><span>30 augustus 2026</span><span>Eigenaar: Witek</span>
+  <span>Status: ter review</span><span>Scope: de wérkwijze, niet het product</span>
+</div>
+
+<div class="card note bad">
+<p style="margin:0"><b>Dit is geen vijfde waarheidsdocument over Plinkie.</b> Het beschrijft hoe er aan de repo gewerkt wordt, niet wat erin draait. Bij elke tegenspraak over het product wint <code>plinkie-blueprint-gcp.html</code>, en de status van de bouw staat uitsluitend in <code>BUILDPLAN.md</code>. Dit document vinkt niets af en verandert geen enkele productbelofte. Zie <a href="#s2">&sect;2</a>.</p>
+</div>
+
+<div class="card">
+<h4 style="margin-top:0">Inhoud</h4>
+<div class="toc">
+<a href="#s1">1. Waar dit over gaat</a>
+<a href="#s2">2. Waar dit document staat</a>
+<a href="#s3">3. Wat het paper meet, en wat daarvan overblijft</a>
+<a href="#s4">4. Waarom déze repo een proefbank is</a>
+<a href="#s5">5. Wat parallel kan, en wat niet</a>
+<a href="#s6">6. De lus, getekend</a>
+<a href="#s7">7. Functies W1–W9</a>
+<a href="#s8">8. De proefopzet</a>
+<a href="#s9">9. Gates die de proef stoppen</a>
+<a href="#s10">10. Risico's</a>
+<a href="#s11">11. Niet-doelen</a>
+<a href="#s12">12. Open besluiten</a>
+</div>
+</div>
+
+<h2 id="s1"><span class="n">1</span>Waar dit over gaat</h2>
+
+<p>Het paper <a href="../research/geng-neubig-2026-caid-asynchrone-swe-agents.pdf">Geng &amp; Neubig (2026)</a> stelt <b>CAID</b> voor: een manager knipt een lange taak in eenheden met een afhankelijkheidsvolgorde, zet elke eenheid weg bij een engineer met een eigen <code>git worktree</code>, en laat werk alleen via <code>git merge</code> op main komen nadat de engineer zelf zijn tests heeft gedraaid. Geen gesprek tussen agenten, maar opdrachten in JSON en commits als voltooiingssignaal.</p>
+
+<p>De vraag van dit document is smal en toetsbaar: <b>levert die werkwijze op déze repo meetbaar beter werk op dan één agent, tegen kosten die de eigenaar wil betalen, zonder de waarborgen te breken die er al staan?</b> Het antwoord kan nee zijn. De proef is zo opgezet dat nee ook een uitkomst is en niet een mislukking.</p>
+
+<div class="card note acc">
+<p style="margin:0"><b>Waarom nu.</b> Deze repo heeft drie dingen die het paper als voorwaarde noemt en die zelden samen bestaan: uitvoerbare verificatie per werkgebied (<code>make test</code>, <code>make web-test</code>, <code>make lint</code>, <code>make design-check</code>, <code>make tf-validate</code>), een expliciet opgeschreven afhankelijkheidsvolgorde in <code>BUILDPLAN.md</code>, en een harnas dat isolatie in een worktree al aanbiedt. Wat ontbreekt is een meting.</p>
+</div>
+
+<h2 id="s2"><span class="n">2</span>Waar dit document staat</h2>
+
+<p><code>CLAUDE.md</code> legt vier documenten vast als de waarheid over het product en waarschuwt tegen een vijfde met een eigen waarheid. Dit document ontwijkt dat verbod niet, het valt erbuiten: het gaat over het bouwproces en raakt geen enkele feature, geen invariant en geen fase.</p>
+
+<table>
+<tr><th>Vraag</th><th>Waar het antwoord staat</th></tr>
+<tr><td>Wat moet Plinkie doen?</td><td><code>plinkie-prd.html</code></td></tr>
+<tr><td>Hoe zit het technisch in elkaar?</td><td><code>plinkie-blueprint-gcp.html</code></td></tr>
+<tr><td>Wat is er af?</td><td><code>BUILDPLAN.md</code>, en nergens anders</td></tr>
+<tr><td>Hoe ziet het eruit en hoe klinkt het?</td><td><code>design/</code></td></tr>
+<tr><td>Hoe wordt er aan gewerkt?</td><td><b>dit document</b>, plus de architectuur en het draaiboek die erop volgen</td></tr>
+</table>
+
+<p>Drie regels die daaruit volgen en die de proef binden:</p>
+<ul>
+<li><b>De vier documenten hierboven zijn tijdens een proefrun alleen-lezen voor de agenten.</b> Wat een run oplevert aan bevindingen over route of doel gaat er na afloop in, met de hand, door de eigenaar of door de manager als aparte stap. Zie W7.</li>
+<li><b>Een proefrun vinkt nooit een checkbox af.</b> Afvinken blijft een handeling van een mens, ook als alle gates groen zijn. Een groene testgate is geen bewijs dat het werk klopt, en dat staat al zo in <code>CLAUDE.md</code>.</li>
+<li><b>De map <code>werkwijze/</code> is geen doeltoestand voor het product.</b> Hij mag herschreven en weggegooid worden. Blijkt de proef niets waard, dan verdwijnt de map en blijft het paper in <code>research/</code> staan als naslag.</li>
+</ul>
+
+<h2 id="s3"><span class="n">3</span>Wat het paper meet, en wat daarvan overblijft</h2>
+
+<p>De samenvatting van het paper noemt <span class="win">+25,6</span> procentpunt op PaperBench en <span class="win">+14,7</span> op Commit0. Beide getallen horen bij MiniMax 2.5, het zwakste van de drie geteste modellen. Voor het sterkste model liggen ze veel lager. Wie de winst op deze repo op de samenvatting baseert, verwacht ongeveer vier keer te veel.</p>
+
+<table>
+<tr><th>Benchmark</th><th>Model</th><th class="num">Eén agent</th><th class="num">CAID</th><th class="num">Verschil</th><th class="num">Runtime</th><th class="num">Kosten</th></tr>
+<tr><td>PaperBench</td><td>Claude Sonnet 4.5</td><td class="num">57,2</td><td class="num">63,3</td><td class="num win">+6,1</td><td class="num">1.803 → 2.080 s</td><td class="num">3,3 → 6,5</td></tr>
+<tr><td>PaperBench</td><td>GLM 4.7</td><td class="num">38,0</td><td class="num">45,4</td><td class="num win">+7,4</td><td class="num">1.178 → 1.449 s</td><td class="num">2,8 → 4,7</td></tr>
+<tr><td>PaperBench</td><td>MiniMax 2.5</td><td class="num">10,5</td><td class="num">36,1</td><td class="num win">+25,6</td><td class="num">2.525 → 3.042 s</td><td class="num">1,1 → 2,6</td></tr>
+<tr><td>Commit0-Lite</td><td>Claude Sonnet 4.5</td><td class="num">53,1</td><td class="num">59,1</td><td class="num win">+6,0</td><td class="num">693 → 1.583 s</td><td class="num">1,9 → 8,1</td></tr>
+<tr><td>Commit0-Lite</td><td>GLM 4.7</td><td class="num">42,9</td><td class="num">46,5</td><td class="num win">+3,6</td><td class="num">871 → 1.388 s</td><td class="num">2,5 → 7,3</td></tr>
+<tr><td>Commit0-Lite</td><td>MiniMax 2.5</td><td class="num">42,3</td><td class="num">57,0</td><td class="num win">+14,7</td><td class="num">752 → 1.909 s</td><td class="num">1,6 → 4,5</td></tr>
+</table>
+<p class="sub">Tabel 2 uit het paper, met 2 engineers op PaperBench en 4 op Commit0-Lite. Kosten in de eenheid van het paper (dollars per taak). Runtime is wandklok.</p>
+
+<h3>3.1 Vier bevindingen die de opzet hier sturen</h3>
+
+<ul>
+<li><b>Isolatie in een worktree doet het werk, niet de opdeling.</b> Het paper zet er een aparte meting tegenover: <i>zachte</i> isolatie, waarbij alle engineers één werkmap delen en de manager botsingen met instructies probeert te voorkomen. Op Commit0 haalt dat 56,1 tegen 59,1 met echte worktrees. Op PaperBench zakt zachte isolatie naar <span class="verlies">55,5</span>, ónder de 57,2 van één enkele agent. Meerdere agenten in één werkmap is daar dus slechter dan er helemaal niet aan beginnen.</li>
+<li><b>Meer engineers is niet beter.</b> Op Commit0 stijgt de score van 2 naar 4 engineers en zakt hij bij 8. Op PaperBench levert meer dan 2 vrijwel niets op terwijl kosten en runtime doorlopen. Het paper wijt dat aan twee grenzen: hoeveel er werkelijk onafhankelijk is, en hoeveel de manager nog kan overzien.</li>
+<li><b>Er is geen versnelling beloofd.</b> In elke rij hierboven stijgt de wandklok. Integratie blijft sequentieel en test-gated; het paper noemt dat zelf als beperking. Wie deze werkwijze koopt voor snelheid koopt het verkeerde.</li>
+<li><b>Eerst één agent proberen en daarna pas opschalen is de duurste route.</b> De gecombineerde strategie haalt op PaperBench met Claude 66,8 tegen 63,3 voor CAID alleen, maar kost 3.884 s tegen 2.080 s en 9,7 tegen 6,5. Op Commit0 met MiniMax levert de combinatie exact hetzelfde cijfer op als CAID alleen, tegen bijna het dubbele.</li>
+</ul>
+
+<div class="card note">
+<p style="margin:0"><b>Die laatste bevinding gaat over strategie, niet over meten.</b> Als wérkwijze is eerst-één-dan-meer verspilling. Als <i>meting</i> zijn beide armen nodig, want zonder de enkelvoudige arm is er niets om het verschil aan af te lezen. De proef in <a href="#s8">&sect;8</a> draait daarom bewust beide, en die kosten zijn onderzoekskosten en geen aanbeveling voor de dagelijkse gang.</p>
+</div>
+
+<h3>3.2 Hoe hard zijn de cijfers</h3>
+<p>Het paper geeft eenzijdige gepaarde t-toetsen. Op PaperBench zijn alle drie de modellen significant. Op Commit0 geldt dat voor Claude Sonnet 4.5 (p&nbsp;=&nbsp;0,006) en MiniMax 2.5 (p&nbsp;=&nbsp;0,007), maar niet voor GLM 4.7 (p&nbsp;=&nbsp;0,095). De reden die de auteurs zelf noemen is de spreiding per repository: <span class="win">+30,7</span> op simpy tegenover <span class="verlies">−10,5</span> op tinydb, met zestien gepaarde waarnemingen.</p>
+<p>Voor ons betekent die spreiding dat de uitkomst van één run op één repo binnen de ruis valt die het paper zelf meet. <a href="#s10">R1</a> gaat daarover.</p>
+
+<h2 id="s4"><span class="n">4</span>Waarom déze repo een proefbank is</h2>
+
+<h3>4.1 De faalwijze is hier al twee keer opgetreden</h3>
+<p>Het probleem dat CAID adresseert is een gedeeld werkstuk met meer dan één schrijver. Deze repo heeft dat twee keer gemeten opgeschreven, zonder dat er ooit bewust parallel is gewerkt:</p>
+<ul>
+<li><b>22-08-2026, vijf commits.</b> Er werkte een tweede sessie in de repo en <code>git add -A</code> sleepte diens werk mee. Het hele designsysteem belandde verspreid over vier Fase 6-commits, zonder eigen commit en zonder logregel. De werkafspraak in <code>CLAUDE.md</code> die per bestand stagen voorschrijft, is daarop geschreven.</li>
+<li><b>28-08-2026, het Tijdlogboek.</b> Twee sessies rekenden die middag allebei vanaf 189,7&nbsp;u; de ene kwam op 190,1 en de andere op 190,3, en de kop bleef op de eerste staan. Het totaal moest opnieuw uit de tabel worden opgeteld. Git meldde hier niets, want de twee schrijvers raakten verschillende regels van hetzelfde blok.</li>
+</ul>
+<p>Die tweede is de scherpste. Een merge-conflict is zichtbaar en wordt opgelost; een teller die stil verkeerd optelt niet. Elk ontwerp voor parallelle agenten moet daar een antwoord op hebben voordat de eerste engineer start.</p>
+
+<h3>4.2 De verificatie bestaat al, en is snel</h3>
+<p>CAID staat of valt met de vraag of een engineer zelf kan vaststellen dat zijn werk deugt. Deze repo heeft dat per werkgebied, en sinds subtaak 2.13 heeft geen enkele Python-test nog Docker nodig. Dat maakt een zelfcontrole in een worktree goedkoop.</p>
+
+<table>
+<tr><th>Werkgebied</th><th>Zelfcontrole vóór commit</th></tr>
+<tr><td><code>services/*</code></td><td><code>make test</code> plus <code>make lint</code></td></tr>
+<tr><td><code>apps/web</code>, <code>apps/landing</code></td><td><code>make web-test</code>, plus <code>make design-check</code> bij CSS of markup</td></tr>
+<tr><td><code>infra/</code></td><td><code>make tf-validate</code></td></tr>
+<tr><td><code>design/</code></td><td><code>make design-check</code>, en anders dan de rest: niet door een engineer, zie W3</td></tr>
+</table>
+
+<p><code>make lint</code> verdient een aparte vermelding. Hij draait <code>ruff F821</code> op ongedefinieerde namen en vond twee fouten die weken meedraaiden, waaronder een lambda die stap 6c van elke nachtrun uitzette. Bij vier tegelijk schrijvende agenten is dat precies het soort fout dat toeneemt.</p>
+
+<h3>4.3 De afhankelijkheidsgraaf staat er half</h3>
+<p><code>BUILDPLAN.md</code> draagt genummerde subtaken met verwijzingen naar elkaar, en <code>CLAUDE.md</code> zegt bovendien welke gebieden zich niet lenen voor parallel werk: schemawijzigingen zijn strikt sequentieel, en alle andere gebieden werden parallelliseerbaar verklaard ná Fase 2. Een manager hoeft de graaf hier dus niet uit het niets te verzinnen, hij leest hem grotendeels. Dat is gunstig, want het paper wijst zwakke opdeling aan als de belangrijkste bron van tegenvallende runs (&sect;4.3 en de beperkingen daar).</p>
+
+<h3>4.4 Het harnas draagt de primitieven</h3>
+<p>Worktree-isolatie is beschikbaar zonder eigen bouwwerk: agenten kunnen in een eigen worktree draaien, en er is een scriptbare orkestratielaag die agenten in fasen parallel zet. Welke van de twee de managerlus draagt is een architectuurvraag en staat bewust niet in dit document; zie <a href="#s12">O4</a>.</p>
+
+<h2 id="s5"><span class="n">5</span>Wat parallel kan, en wat niet</h2>
+
+<p>Het paper markeert gedeelde bestanden als <i>restricted</i> en verbiedt engineers ze te committen, met <code>__init__.py</code> als voorbeeld. Deze repo heeft een zwaardere versie van datzelfde probleem, en die zit niet in de code maar in de administratie. Vrijwel elke subtaak eindigt in <code>BUILDPLAN.md</code>: een checkbox, een logregel, en een lopend totaal dat opgeteld moet worden. Vier engineers die dat allemaal doen, botsen gegarandeerd, en volgens &sect;4.1 niet altijd zichtbaar.</p>
+
+<table>
+<tr><th>Bestand of gebied</th><th>Begrenzing</th><th>Waarom</th></tr>
+<tr><td><code>BUILDPLAN.md</code></td><td><b>verboden</b></td><td>Checkbox, logregel en teller. De teller merget stil verkeerd; zie &sect;4.1. Alleen de manager schrijft, ná de merge</td></tr>
+<tr><td>De vier doeltoestanddocumenten</td><td><b>verboden</b></td><td>Een wijziging hoort in een eigen commit vóór de code, door een mens beoordeeld</td></tr>
+<tr><td><code>design/**</code></td><td><b>verboden</b></td><td>Canonieke bron van vorm en taal. Eerst de stijlgids, dan de app</td></tr>
+<tr><td><code>Makefile</code>, <code>plinkie.code-workspace</code></td><td><b>verboden</b></td><td>Gedeelde ingang van elke andere agent. Een halve wijziging hier breekt alle worktrees tegelijk</td></tr>
+<tr><td><code>werkwijze/**</code>, <code>scripts/werkwijze/**</code></td><td><b>verboden</b></td><td>De proef mag zijn eigen regels niet kunnen wijzigen. Een engineer die deze lijst mag aanpassen, is er niet door begrensd</td></tr>
+<tr><td><code>db/duckdb/**</code></td><td><b>verboden</b> voor deze run</td><td>Schemawijzigingen zijn strikt sequentieel en het nummer wordt geclaimd. Fase 7 heeft er geen nodig, dus het pad staat dicht. Een run die er wél een nodig heeft, zet hem op <i>exclusief</i></td></tr>
+<tr><td><code>services/shared/**</code></td><td><b>exclusief</b></td><td>Hooguit één engineer tegelijk. Alle andere services importeren deze contracten</td></tr>
+<tr><td>Overige <code>services/*</code>, <code>apps/*</code>, <code>infra/</code></td><td>vrij</td><td>Eigen tests, eigen venv, duidelijke grens</td></tr>
+</table>
+
+<p><b>Er staan twee soorten begrenzing in die tabel, en ze worden op een andere plek gehandhaafd</b> (toegevoegd 30-08-2026, bij de bouw van C1; tot dan noemde deze tabel ze allebei "hooguit één engineer per run" en zette het ontwerp er één van in de verbodslijst). <b>Verboden</b> wordt getoetst op de diff, vlak vóór de merge, en één treffer breekt de run af. <b>Exclusief</b> wordt toegepast bij het uitdelen: de manager geeft het pad aan hooguit één engineer tegelijk. Een roosterregel achteraf handhaven kan niet, want dan is het werk al gedaan.</p>
+
+<div class="card note bad">
+<p style="margin:0"><b>De verbodslijst is de scherpste gate van de proef.</b> Een engineer die <code>BUILDPLAN.md</code> aanraakt heeft niet een regel overtreden maar de meting bedorven, want vanaf dat moment is niet meer vast te stellen of de administratie klopt. Zie G1.</p>
+</div>
+
+<h2 id="s6"><span class="n">6</span>De lus, getekend</h2>
+
+<figure>
+<svg viewBox="0 0 940 430" role="img" aria-labelledby="svgtitel svgdesc" xmlns="http://www.w3.org/2000/svg">
+  <title id="svgtitel">De CAID-lus toegepast op deze repo</title>
+  <desc id="svgdesc">De manager leest het build plan en de invarianten, bouwt een afhankelijkheidsgraaf en stuurt opdrachten in JSON naar engineers. Elke engineer werkt in een eigen worktree en draait zijn eigen tests voordat hij commit. De manager merget naar de proefbranch, schrijft als enige de administratie bij, en werkt de graaf bij voor de volgende ronde.</desc>
+  <defs>
+    <marker id="pijl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--tx3)"/>
+    </marker>
+    <marker id="pijlacc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--acc)"/>
+    </marker>
+  </defs>
+
+  <rect x="20" y="18" width="250" height="62" rx="10" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.5"/>
+  <text x="34" y="42" font-size="13" font-weight="700" fill="var(--tx)">Manager</text>
+  <text x="34" y="60" font-size="11.5" fill="var(--tx2)">leest BUILDPLAN.md + CLAUDE.md</text>
+  <text x="34" y="74" font-size="11.5" fill="var(--tx2)">verzint geen subtaken</text>
+
+  <path d="M270,49 L330,49" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#pijl)"/>
+
+  <rect x="334" y="18" width="230" height="62" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+  <text x="348" y="42" font-size="13" font-weight="700" fill="var(--tx)">Afhankelijkheidsgraaf</text>
+  <text x="348" y="60" font-size="11.5" fill="var(--tx2)">alleen wat klaar is, wordt</text>
+  <text x="348" y="74" font-size="11.5" fill="var(--tx2)">uitgedeeld</text>
+
+  <path d="M564,49 L624,49" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#pijl)"/>
+
+  <rect x="628" y="18" width="230" height="62" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+  <text x="642" y="42" font-size="13" font-weight="700" fill="var(--tx)">Opdracht in JSON</text>
+  <text x="642" y="60" font-size="11.5" fill="var(--tx2)">paden, doel, toets, verboden</text>
+  <text x="642" y="74" font-size="11.5" fill="var(--tx2)">bestanden. Geen vrij gesprek</text>
+
+  <path d="M743,80 L743,104 L160,104 L160,134" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#pijl)"/>
+  <path d="M470,104 L470,134" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#pijl)"/>
+  <path d="M743,104 L743,134" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#pijl)"/>
+
+  <g>
+    <rect x="45" y="138" width="230" height="96" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+    <text x="59" y="162" font-size="13" font-weight="700" fill="var(--tx)">Engineer 1</text>
+    <text x="59" y="180" font-size="11.5" fill="var(--tx2)">eigen git worktree</text>
+    <text x="59" y="200" font-size="11.5" fill="var(--good)">make test · make lint</text>
+    <text x="59" y="220" font-size="11.5" fill="var(--tx2)">commit pas als groen</text>
+  </g>
+  <g>
+    <rect x="355" y="138" width="230" height="96" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+    <text x="369" y="162" font-size="13" font-weight="700" fill="var(--tx)">Engineer 2</text>
+    <text x="369" y="180" font-size="11.5" fill="var(--tx2)">eigen git worktree</text>
+    <text x="369" y="200" font-size="11.5" fill="var(--good)">make web-test</text>
+    <text x="369" y="220" font-size="11.5" fill="var(--tx2)">commit pas als groen</text>
+  </g>
+  <g>
+    <rect x="665" y="138" width="230" height="96" rx="10" fill="var(--panel)" stroke="var(--line)" stroke-dasharray="4 3"/>
+    <text x="679" y="162" font-size="13" font-weight="700" fill="var(--tx2)">Engineer 3</text>
+    <text x="679" y="180" font-size="11.5" fill="var(--tx2)">wacht: afhankelijkheid</text>
+    <text x="679" y="200" font-size="11.5" fill="var(--tx2)">nog niet gemerged</text>
+    <text x="679" y="220" font-size="11.5" fill="var(--tx3)">stilstaan mag</text>
+  </g>
+
+  <path d="M160,234 L160,262 L470,262 L470,286" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#pijl)"/>
+  <path d="M470,234 L470,286" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#pijl)"/>
+
+  <rect x="240" y="290" width="460" height="56" rx="10" fill="var(--panel)" stroke="var(--good)" stroke-width="1.5"/>
+  <text x="256" y="314" font-size="13" font-weight="700" fill="var(--tx)">Merge naar de proefbranch</text>
+  <text x="256" y="332" font-size="11.5" fill="var(--tx2)">conflict? de engineer die hem maakte lost hem op, in zijn eigen worktree</text>
+
+  <rect x="240" y="360" width="460" height="52" rx="10" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.5"/>
+  <text x="256" y="382" font-size="13" font-weight="700" fill="var(--tx)">Administratie — alleen de manager schrijft</text>
+  <text x="256" y="400" font-size="11.5" fill="var(--tx2)">checkbox, logregel, lopend totaal. Eén schrijver, of de teller loopt stil scheef</text>
+
+  <path d="M470,346 L470,358" stroke="var(--tx3)" stroke-width="1.5" fill="none" marker-end="url(#pijl)"/>
+
+  <path d="M240,386 L145,386 L145,318 L20,318 L20,49" stroke="var(--acc)" stroke-width="1.5" fill="none" stroke-dasharray="5 4" marker-end="url(#pijlacc)"/>
+  <text x="30" y="300" font-size="11.5" fill="var(--acc)">graaf bijwerken,</text>
+  <text x="30" y="316" font-size="11.5" fill="var(--acc)">volgende taak</text>
+
+  <rect x="712" y="290" width="208" height="74" rx="10" fill="var(--panel)" stroke="var(--bad)" stroke-width="1.5"/>
+  <text x="726" y="312" font-size="12.5" font-weight="700" fill="var(--bad)">Verbodslijst</text>
+  <text x="726" y="330" font-size="11.5" fill="var(--tx2)">raakt een engineer er één,</text>
+  <text x="726" y="346" font-size="11.5" fill="var(--tx2)">dan stopt de run</text>
+</svg>
+<figcaption>De lus uit het paper, met de twee toevoegingen die deze repo nodig heeft: de administratie als aparte stap met één schrijver, en een verbodslijst die de run afbreekt in plaats van hem te corrigeren. Inline SVG zonder JavaScript, in de kleurvariabelen van dit document.</figcaption>
+</figure>
+
+<h2 id="s7"><span class="n">7</span>Functies W1–W9</h2>
+<p class="sub">W-nummers, om botsing met de F-nummers van het product te vermijden. <span class="tag p0">P0</span> moet er zijn vóór de eerste run, <span class="tag p1">P1</span> vóór de tweede, <span class="tag p2">P2</span> is later.</p>
+
+<h3>W1 <span class="tag p0">P0</span> De graaf komt uit het plan, niet uit de manager</h3>
+<p>De manager leest <code>BUILDPLAN.md</code> en de invarianten in <code>CLAUDE.md</code>, en bouwt daaruit een graaf van bestaande, nog niet afgevinkte subtaken. Hij mag subtaken groeperen, splitsen en op volgorde zetten. Hij mag er geen bedenken. Een subtaak die hij nodig acht maar niet in het plan staat, meldt hij aan de eigenaar en dan stopt die tak.</p>
+<p>De reden is de documenthiërarchie: wat gebouwd wordt staat in het build plan, en een agent die er werk bij verzint schrijft doeltoestand op een plek waar dat niet mag.</p>
+
+<div class="card note bad">
+<p style="margin:0"><b>Bijgesteld in v1.2 (30-08-2026, bij de bouw van C1b): het plan draagt de taken wél en de volgorde niet.</b> In heel <code>BUILDPLAN.md</code> schrijft <b>precies één subtaak</b> zijn afhankelijkheid uit in een vorm die een machine kan lezen: 7.3 vereist 6.18 t/m 6.21. De rest van de volgorde staat nergens. Deze feature luidt daarom in twee helften. <b>De taken</b> komen uit het plan en de manager mag er geen verzinnen; dat was en blijft de regel. <b>De randen</b> staan met de hand in <code>opzet.json</code>, per run, en zijn op het scherm te zien. De manager mag een rand vóórstellen en nooit stilzwijgend toepassen. Wat het plan zelf uitschrijft komt er altijd bij en kan door de opzet niet worden weggenomen.</p>
+</div>
+
+<h3>W2 <span class="tag p0">P0</span> Eén worktree per engineer, allemaal van dezelfde basis</h3>
+<p>Elke engineer krijgt een eigen <code>git worktree</code> op een eigen branch, afgeleid van de proefbranch. Zachte isolatie is uitgesloten, op grond van een meting: op PaperBench scoort die lager dan één enkele agent (&sect;3.1).</p>
+<p>Vóór het uitdelen brengt de manager de basis in werkende staat: de <code>uv</code>-venvs bestaan, <code>make test</code> is groen, en de code-workspace klopt. Dat wordt op de proefbranch gecommit zodat elke engineer van dezelfde ondergrond vertrekt.</p>
+
+<h3>W3 <span class="tag p0">P0</span> De verbodslijst, en wie hem handhaaft</h3>
+<p>De lijst uit &sect;5 gaat mee in elke opdracht. Handhaving gebeurt niet op vertrouwen maar op de commit: de manager leest de gewijzigde paden vóór de merge en breekt de run af bij een treffer. Dat is een controle van enkele regels script, en hij vervangt geen enkele instructie in de opdracht; hij bewijst alleen dat de instructie is opgevolgd.</p>
+
+<h3>W4 <span class="tag p0">P0</span> Zelfcontrole vóór de commit</h3>
+<p>Een engineer draait vóór elke commit de toets die bij zijn werkgebied hoort (&sect;4.2). Rood betekent doorwerken, niet melden. Het paper hangt hier zijn hele stabiliteitswinst aan op, en meet daarnaast een strengere variant waarin de manager elke ronde meeleest: 60,2% tegen 55,1%, tegen 1,6 keer de runtime. Welke van de twee we draaien staat als <a href="#s12">O6</a> open.</p>
+
+<h3>W5 <span class="tag p0">P0</span> Integratie loopt over een proefbranch, nooit over main</h3>
+<p>De manager merget engineerbranches naar de proefbranch, en verder komt het niet. De stap naar <code>main</code> zet een mens, na review, met de gewone regels: per bestand stagen, een logregel, een commit die bevat wat zijn boodschap beschrijft.</p>
+<p>Loopt een merge vast op een conflict, dan lost de engineer die hem veroorzaakte hem op in zijn eigen worktree, door de proefbranch binnen te halen. De manager lost geen conflicten op, want dan schrijft hij code die niemand heeft getoetst.</p>
+
+<h3>W6 <span class="tag p1">P1</span> De opdracht is een formulier, geen gesprek</h3>
+<p>Manager en engineer wisselen een vaste structuur uit: welke subtaak, welke paden, welke toets, welke verboden bestanden, en welke afhankelijkheden al gemerged zijn. Voltooiing wordt gemeld met een commit, niet met een zin. Het paper wijst vrij gesprek tussen agenten aan als de belangrijkste faalwijze van meeragentsystemen, en deze repo heeft er zelf een reden bij: een opdracht in een vaste vorm is achteraf na te lezen en te tellen.</p>
+
+<h3>W7 <span class="tag p0">P0</span> De administratie is een aparte stap met één schrijver</h3>
+<p>Na een geslaagde merge werkt de manager <code>BUILDPLAN.md</code> bij: hij zet geen vinkje, maar schrijft één logregel per gemergede subtaak en telt het lopend totaal opnieuw op uit de tabel in plaats van erbij op te tellen. Dat opnieuw optellen is precies de reparatie die op 28-08-2026 met de hand nodig was.</p>
+<p>Wat de manager wél in het build plan mag zetten is een bevinding die route of doel raakt, als tekst, in dezelfde commit. Afvinken blijft aan een mens (&sect;2).</p>
+
+<h3>W8 <span class="tag p0">P0</span> Elke run laat een meetblad achter</h3>
+<p>Zonder meetblad is een run een anekdote. Per run leggen we vast: welke subtaken, hoeveel engineers, wandklok, modelkosten, aantal merges, aantal conflicten, aantal afgebroken taken, de uitslag van elke gate uit &sect;9, en het oordeel van de eigenaar per subtaak. Het blad hoort bij de proef en niet bij het product, dus het staat in <code>werkwijze/</code> en niet in <code>rapportage/</code>.</p>
+
+<h3>W9 <span class="tag p0">P0</span> Noodrem</h3>
+<p>De run stopt onmiddellijk bij een treffer op de verbodslijst, bij het overschrijden van het kostenplafond (<a href="#s12">O2</a>), bij drie mislukte merges achter elkaar op dezelfde branch, of wanneer de eigenaar hem stopt. Stoppen laat de proefbranch staan zoals hij is; er wordt niets teruggedraaid, want een halve run is ook een waarneming.</p>
+
+<h2 id="s8"><span class="n">8</span>De proefopzet</h2>
+
+<h3>8.1 Wat we op de proefbank leggen</h3>
+<p>Voorstel: <b>Fase 7, de bewakingsmotor</b>, subtaken 7.1 tot en met 7.6. Die keuze heeft vier eigenschappen die een meting mogelijk maken:</p>
+<ul>
+<li>De fase is helemaal open, dus er is niets af te vinken dat al bestaat.</li>
+<li>Hij begint met een nieuwe map, <code>services/watchdog/</code>, met een eigen venv en eigen tests. De grens tussen engineers valt samen met een mapgrens.</li>
+<li>De motor is deterministisch en gebruikt geen LLM (invariant in <code>CLAUDE.md</code>), dus <code>make test</code> is een echte toets en geen indicatie.</li>
+<li>De subtaken hangen zichtbaar samen: 7.6 zet de motor als stap 8 in de nachtrun en kan pas als de rest staat, terwijl 7.2, 7.4 en 7.5 grotendeels naast elkaar kunnen. Dat geeft de manager iets te ontdekken in plaats van een rij losse klusjes.</li>
+</ul>
+<p>Er zit een addertje in, en dat is het aardigste deel van de proef: 7.3 loopt via de bezorgdienst uit subtaak 6.21, die nog niet gebouwd is. Een manager die de graaf goed leest, ziet die afhankelijkheid en laat 7.3 staan. Een manager die alleen de kopjes van Fase 7 leest, deelt hem uit en levert werk dat nergens op aansluit. De eigenaar weet dit vooraf en zegt het niet.</p>
+
+<h3>8.2 Twee armen</h3>
+<table>
+<tr><th></th><th>Arm A — huidige werkwijze</th><th>Arm B — CAID</th></tr>
+<tr><td>Uitvoering</td><td>Eén agent, één worktree, de subtaken op volgorde</td><td>Manager plus 2 engineers (<a href="#s12">O5</a>), elk een eigen worktree</td></tr>
+<tr><td>Branch</td><td><code>proef/fase7-enkel</code></td><td><code>proef/fase7-caid</code></td></tr>
+<tr><td>Toetsen</td><td colspan="2">Dezelfde, uit &sect;4.2. Beide armen draaien alle gates uit &sect;9</td></tr>
+<tr><td>Opdracht</td><td colspan="2">Dezelfde tekst uit het build plan, woordelijk. Geen extra aanwijzingen aan één van de twee</td></tr>
+</table>
+<p>Beide armen draaien van dezelfde basis-commit en raken <code>main</code> niet. Wat de eigenaar daarna houdt, houdt hij; dat mag arm A zijn, arm B, een combinatie, of niets. De proef levert dus in het slechtste geval een oordeel op en in het beste geval ook nog werkende code.</p>
+
+<h3>8.3 Wat we meten</h3>
+<table>
+<tr><th>Maat</th><th>Hoe</th><th>Waarom die en geen andere</th></tr>
+<tr><td>Gates groen</td><td>De vijf commando's uit &sect;4.2 op de eindstand van de branch</td><td>Het enige harde, herhaalbare signaal dat de repo zelf al vertrouwt</td></tr>
+<tr><td>Oordeel per subtaak</td><td>De eigenaar kiest uit drie: houden, houden na correctie, weggooien</td><td>Groene tests zeggen niet of het werk klopt. Drie standen dwingen een keuze af zonder een cijfer te verzinnen</td></tr>
+<tr><td>Handwerk achteraf</td><td>Aantal regels dat de eigenaar wijzigt vóór hij de diff accepteert, tegenover de omvang van de diff</td><td>Vangt "lokaal correct, globaal duur te integreren", de faalwijze die het paper bij zwakke opdeling noemt</td></tr>
+<tr><td>Kosten</td><td>Modelkosten per arm</td><td>Het paper meet 2 tot 4 keer zoveel. Als dat hier ook zo is, moet de winst dat waard zijn</td></tr>
+<tr><td>Wandklok</td><td>Van start tot laatste merge</td><td>Om te toetsen of de belofte klopt dat er géén versnelling is (&sect;3.1)</td></tr>
+<tr><td>Merges en conflicten</td><td>Tellen uit de git-historie van de proefbranch</td><td>De coördinatiebelasting die het paper als beperking opschrijft</td></tr>
+</table>
+
+<h3>8.4 Volgorde en herhaling</h3>
+<p>Arm A eerst, omdat zijn kosten het plafond voor arm B bepalen (G4). Daarna arm B. Beide armen één keer; dat is genoeg voor een besluit over doorgaan of stoppen, en te weinig voor een uitspraak over hoevéél het oplevert. Zie R1.</p>
+
+<h2 id="s9"><span class="n">9</span>Gates die de proef stoppen</h2>
+
+<table>
+<tr><th></th><th>Gate</th><th>Norm</th><th>Gevolg bij rood</th></tr>
+<tr><td><b>G1</b></td><td>Verbodslijst</td><td>Geen enkele engineercommit raakt een bestand uit &sect;5</td><td>De run stopt direct. De meting van deze arm vervalt en de oorzaak gaat terug het ontwerp in</td></tr>
+<tr><td><b>G2</b></td><td>Groene eindstand</td><td><code>make test</code>, <code>make web-test</code>, <code>make lint</code>, <code>make design-check</code> en <code>make tf-validate</code> groen op de eindstand van de branch</td><td>De arm telt als mislukt, niet als bijna. Eén rood commando is een mislukte run</td></tr>
+<tr><td><b>G3</b></td><td>Oordeel</td><td>Arm B scoort over de zes subtaken minstens zo vaak "houden" als arm A</td><td>Geen tweede proefrun. Het idee gaat terug de la in met de meting erbij</td></tr>
+<tr><td><b>G4</b></td><td>Kosten</td><td>Arm B kost hooguit vier keer arm A</td><td>De run stopt op het plafond, met het meetblad tot dat punt</td></tr>
+<tr><td><b>G5</b></td><td>Administratie</td><td>Na afloop klopt het lopend totaal in <code>BUILDPLAN.md</code> met de som van de regels</td><td>De ernstigste uitslag van allemaal: dan heeft de werkwijze de fout van 28-08-2026 herhaald, met een machine als schrijver</td></tr>
+</table>
+
+<div class="card note">
+<p style="margin:0"><b>G3 is de zwakste van de vijf en dat is bekend.</b> Zes subtaken en één run per arm is te weinig om een verschil van een paar procentpunt te zien; het paper heeft er zestien gepaarde waarnemingen voor nodig en haalt dan nog niet overal significantie. G3 is daarom een besluitregel voor de eigenaar en geen bewijs. Wie hem later als bewijs citeert, citeert hem verkeerd.</p>
+</div>
+
+<h2 id="s10"><span class="n">10</span>Risico's</h2>
+
+<table>
+<tr><th></th><th>Risico</th><th>Wat we ertegen doen</th></tr>
+<tr><td><b>R1</b></td><td><b>Eén repo, één run, zes subtaken.</b> Het paper meet zelf een spreiding van +30,7 tot −10,5 procentpunt tussen repositories. Onze uitkomst valt binnen die ruis</td><td>De uitkomst wordt opgeschreven als besluit en niet als bevinding. G3 heet daarom een besluitregel</td></tr>
+<tr><td><b>R2</b></td><td><b>De grote winst zat bij het zwakste model.</b> Met het sterkste model meet het paper +6,1 en +6,0. Deze repo draait op een sterk model, dus de verwachting hoort laag te staan</td><td>Vooraf opgeschreven in &sect;3, zodat een tegenvallende uitkomst geen verrassing is die achteraf wordt weggeredeneerd</td></tr>
+<tr><td><b>R3</b></td><td><b>De coördinatiebelasting verhuist naar de eigenaar.</b> Vier parallelle diffs beoordelen is meer werk dan één, en dat werk komt bij de enige mens in het systeem terecht</td><td>Twee engineers in de eerste run, niet vier. En het handwerk achteraf is een gemeten maat (&sect;8.3), geen bijvangst</td></tr>
+<tr><td><b>R4</b></td><td><b>De administratie is kwetsbaarder dan de code.</b> Een fout in <code>BUILDPLAN.md</code> is stil, en het is de enige plek waar status staat</td><td>W7 en G5. De manager telt opnieuw op uit de tabel, en de controle achteraf is een gate en geen gewoonte</td></tr>
+<tr><td><b>R5</b></td><td><b>Zwakke opdeling levert werk op dat duur is om te integreren.</b> Het paper noemt dit als hoofdoorzaak van tegenvallende runs, en laat zien dat één ontbrekende sleuteltaak een run van 34,3% naar 8,7% brengt</td><td>W1 laat de manager uit het plan lezen in plaats van verzinnen, en 8.1 bevat met opzet een verborgen afhankelijkheid om te zien of hij hem vindt</td></tr>
+<tr><td><b>R6</b></td><td><b>Het kost meer en gaat niet sneller.</b> In elke rij van tabel 2 stijgt de wandklok</td><td>Vooraf gezegd in &sect;3.1, gemeten in &sect;8.3, en begrensd door G4</td></tr>
+<tr><td><b>R7</b></td><td><b>De taalgate bestaat alleen op papier.</b> <code>CLAUDE.md</code> zegt dat <code>make taal-check</code> meedraait in <code>make web-test</code>; dat doel staat niet in de <code>Makefile</code>. Alleen de ankercontrole draait, binnen <code>make design-check</code>. Klanttekst uit meerdere agenten kan dus uiteenlopen zonder dat iets dat meet</td><td>Engineers krijgen in deze proef geen klanttekst toebedeeld. Fase 7 is een service zonder gebruikersgerichte teksten, en dat is een reden te meer om juist die fase te kiezen</td></tr>
+<tr><td><b>R8</b></td><td><b>Een agent leest een groene testgate als toestemming om af te vinken.</b> <code>CLAUDE.md</code> waarschuwt daar al voor bij Fase 2</td><td>W7: de manager schrijft logregels en bevindingen, nooit een vinkje</td></tr>
+</table>
+
+<h2 id="s11"><span class="n">11</span>Niet-doelen</h2>
+<ul>
+<li><b>Geen agenten in het product.</b> De nachtrun blijft een deterministische keten; ADK komt pas binnen bij 4.3b, en de beoordelaar en de speurder blijven de enige twee. Dit document gaat over het bouwen en niet over wat er draait.</li>
+<li><b>Geen wijziging van de documenthiërarchie.</b> Als de proef slaagt, verandert er niets aan wie de waarheid draagt; er komt alleen een manier bij om er werk naartoe te brengen.</li>
+<li><b>Geen vervanging van de review door een mens.</b> De stap naar <code>main</code> blijft handwerk, ook bij vijf groene gates.</li>
+<li><b>Geen tweede orkestratielaag in de repo.</b> Wat het harnas al kan, bouwen we niet na. Blijkt er toch eigen code nodig, dan is dat een bevinding voor het architectuurdocument en geen stilzwijgende uitbreiding.</li>
+<li><b>Geen proef op een fase die aan een échte nachtrun hangt.</b> Fase 2 wacht op twee geslaagde nachtruns; daar hoort geen experiment tussen.</li>
+</ul>
+
+<h2 id="s12"><span class="n">12</span>Open besluiten</h2>
+<p class="sub">Deze horen bij de eigenaar en niet bij het volgende document. Het architectuurdocument mag pas geschreven worden met O4 en O5 beantwoord.</p>
+
+<table>
+<tr><th></th><th>Besluit</th><th>Voorstel</th></tr>
+<tr><td><b>O1</b></td><td>Wat telt als tijd in het Tijdlogboek bij parallelle uitvoering? De regel zegt nu "tel het werk, niet de wandklok", en bij twee engineers zijn dat twee verschillende getallen</td><td>De wandklok van de run, met het aantal engineers en de modelkosten erbij in dezelfde regel. Dan blijft het totaal vergelijkbaar met alle eerdere regels, en is zichtbaar dat er machinewerk in zit</td></tr>
+<tr><td><b>O2</b></td><td>Kostenplafond per proefrun</td><td>Vier keer de gemeten kosten van arm A, met een absolute bovengrens die de eigenaar noemt voordat arm B start</td></tr>
+<tr><td><b>O3</b></td><td>Mag een geslaagde arm rechtstreeks naar <code>main</code>?</td><td>Nee. De proefbranch is de eindbestemming van de run; de merge naar <code>main</code> is een aparte handeling van een mens, met de gewone commitregels</td></tr>
+<tr><td><b>O4</b></td><td>Wie draagt de managerlus: een agent met eigen worktrees onder zich, of een script dat de agenten in fasen aanstuurt?</td><td>Open. Dit is de kernvraag van het architectuurdocument. Het paper koos een gescripte lus met een agent als manager erin; beide vormen bestaan in het harnas</td></tr>
+<tr><td><b>O5</b></td><td>Hoeveel engineers in de eerste run?</td><td>Twee. Het paper haalt 4 alleen bij een expliciete bestandsstructuur met tests die de opdeling voorschrijven, en zakt bij 8. Fase 7 lijkt meer op de open variant</td></tr>
+<tr><td><b>O6</b></td><td>Leest de manager elke ronde mee, of vertrouwt hij op de zelfcontrole van de engineer?</td><td>Zelfcontrole in de eerste run, omdat die het dichtst bij de hoofdmeting van het paper ligt. De strengere variant kost 1,6 keer de runtime voor 5,1 procentpunt en is een tweede run waard als de eerste iets oplevert</td></tr>
+<tr><td><b>O7</b></td><td>Wat gebeurt er met <code>werkwijze/</code> als de proef stopt?</td><td>Weggooien, met één regel in <code>research/README.md</code> onder het paper dat het geprobeerd is en wat eruit kwam. Een map met een dood idee erin is erger dan geen map</td></tr>
+</table>
+
+<footer>
+PRD — CAID op deze repo · versie 1.2 · 30 augustus 2026 · eigenaar Witek<br>
+Bron: <a href="../research/geng-neubig-2026-caid-asynchrone-swe-agents.pdf">Geng &amp; Neubig, <i>Effective Strategies for Asynchronous Software Engineering Agents</i></a>, arXiv:2603.21489v2, 8 juli 2026.<br>
+Volgende documenten, pas na goedkeuring van dit document: de architectuur (hoe de lus gebouwd wordt) en het draaiboek (welke stappen in welke volgorde).
+</footer>
+
+</div>
+</body>
+</html>

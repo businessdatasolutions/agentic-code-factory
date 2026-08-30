@@ -1,0 +1,66 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfstate.d/
+*.tfvars
+!example.tfvars
+# Omgevingsconfig hoort wél in git: projectnaam en env, geen geheimen.
+# Secret-waarden gaan met de hand naar Secret Manager (X1.9), nooit in tfvars.
+
+# Gegenereerde rapportage (make mutatie-overzicht). De generator hoort in git, de
+# uitvoer niet: die verandert elke nacht en is uit het werkbestand te herhalen.
+# Idem voor het speurdossier (make speurder-gate, 4b.19). Het draagt bovendien
+# citaten van andermans pagina's, en die horen in de keten en niet in de repo.
+
+# Werkbestanden van de CAID-proef (werkwijze/caid-ontwerp.html §4.3). Het logboek,
+# de graaf en de aanwijzing veranderen tijdens een run per seconde en zijn uit de
+# branches te herhalen; alleen het meetblad blijft, want dat is de uitkomst.
+werkwijze/runs/*/*
+!werkwijze/runs/*/meetblad.md
+
+# Worktrees van de engineers. Ze staan binnen de repo omdat een worktree daarbuiten
+# buiten de werkmappen van de sessie valt, en dan wordt elke schrijfhandeling een
+# vraag om toestemming.
+.claude/worktrees/
+
+# Secrets & env
+.env
+.env.*
+*.key
+*.json.credentials
+
+# Tooling-artefacten
+.playwright-mcp/
+*.log
+
+# Editor. Persoonlijke VS Code-state hoort niet in de repo; plinkie.code-workspace
+# juist wél — dat bestand meldt elke service met zijn eigen venv aan en is daarmee
+# een gedeelde afspraak, met alleen relatieve paden erin.
+.vscode/
+
+# Next.js
+next-env.d.ts
+
+# TypeScript-buildcache. Wordt bij elke build herschreven en dook daardoor bij iedere
+# sessie op als wijziging, terwijl hij niets over de doeltoestand zegt en volledig uit
+# de bron te herbouwen is. `apps/web/tsconfig.tsbuildinfo` stond tot 23-08-2026 wél in
+# git; die is met `git rm --cached` uit de tracking gehaald en staat nog gewoon op schijf.
+*.tsbuildinfo
+
+# Losse bouwmap voor de testgate naast een draaiende `next dev` (zie
+# apps/landing/next.config.mjs). Zelfde soort artefact als .next.

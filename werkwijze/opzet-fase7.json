@@ -1,0 +1,37 @@
+{
+  "naam": "Fase 7 — bewakingsmotor",
+  "basisbranch": "proef/fase7-caid",
+  "subtaken": ["7.1", "7.2", "7.3", "7.4", "7.5", "7.6"],
+
+  "randen-waarom": [
+    "In het hele BUILDPLAN.md staat precies één expliciete afhankelijkheid (7.3 op 6.18–6.21).",
+    "De volgorde van al het andere zit in het hoofd van wie het plan schreef, en daar kan een",
+    "manager niet bij. Daarom staan de randen hier, met de hand, en niet uit proza geraden.",
+    "",
+    "`randen` moet élke subtaak uit `subtaken` noemen. Een lege lijst betekent 'nagelopen en",
+    "onafhankelijk'; ontbreken betekent 'niemand heeft ernaar gekeken', en dat is iets anders.",
+    "De bouwer weigert een opzet waarin een subtaak ontbreekt.",
+    "",
+    "Wat het build plan zelf zegt wint altijd: die randen komen erbij, ook als ze hier ontbreken."
+  ],
+
+  "randen": {
+    "7.1": [],
+    "7.2": [],
+    "7.3": [],
+    "7.4": ["7.1"],
+    "7.5": ["7.2"],
+    "7.6": ["7.1", "7.2", "7.4", "7.5"]
+  },
+
+  "randen-per-subtaak": {
+    "7.1": "De join is het fundament en wacht op niets binnen deze fase.",
+    "7.2": "Drempels en voorkeuren zijn een eigen tabel; kan naast 7.1.",
+    "7.3": "Hier staat bewust niets. Het build plan draagt zelf de eis 6.18 t/m 6.21, en die komt er bij het bouwen bij. Wie hier een lijst zet, verbergt dat.",
+    "7.4": "Toetst de kalenderlogica uit de join, dus die moet er zijn.",
+    "7.5": "Anti-ruis rekent met de drempel uit 7.2.",
+    "7.6": "Zet de motor als stap 8 in de nachtrun; kan pas als de rest staat. 7.3 staat er niet bij, want die valt buiten bereik en zou 7.6 anders voorgoed blokkeren."
+  },
+
+  "eigenaar": "Deze randen zijn een voorstel en horen door een mens bekeken te worden vóór de eerste run. Ze zijn geen meting."
+}

@@ -1,0 +1,56 @@
+# CI/CD voor het volgscherm van de code factory.
+#
+# Zelfde vorm als cloudbuild.web.yaml: de trigger bepaalt het project, de image
+# draagt de commit-SHA, en Cloud Build maakt de Cloud Run-service aan — OpenTofu
+# bezit de trigger en de identiteiten, niet de service zelf.
+#
+# De service draait onder het `website`-account. Dat is bewust het account met
+# uitsluitend léésrecht: dit scherm leest niets uit Google Cloud en hoeft dus
+# helemaal geen rechten. Een eigen account zonder rollen zou netter zijn en is
+# werk voor na de inzending; wat het niet mag, mag het via dit account ook niet.
+
+substitutions:
+  _REGION: europe-west4
+  _REPO: plinkie
+  _SERVICE: fabriek
+
+# De image draagt `$BUILD_ID` en niet `$SHORT_SHA`: die laatste bestaat alleen bij
+# een build vanaf een commit, en deze service wordt ook met de hand uitgerold. Een
+# lege tag geeft `invalid reference format`, en dat is een fout die je pas in de
+# build ziet (gemeten 30-08-2026). Een substitutie kan `$BUILD_ID` niet als
+# standaardwaarde dragen; hij hoort in de stap zelf.
+
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --tag=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$BUILD_ID
+      - --file=services/fabriek/Dockerfile
+      - .
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$BUILD_ID
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$BUILD_ID
+      - --region=${_REGION}
+      - --service-account=website@$PROJECT_ID.iam.gserviceaccount.com
+      - --min-instances=0
+      # Twee instanties dragen een jury ruim. Het scherm houdt geen state, dus
+      # meer instanties zouden alleen meer kosten en geen ander antwoord geven.
+      - --max-instances=2
+      - --allow-unauthenticated
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
