@@ -12,10 +12,10 @@
   <text x="24" y="48" font-size="12" fill="#5b6472">A manager agent turns a written build plan into parallel, test-gated work. Google services are named in each block.</text>
 
   <!-- input -->
-  <rect x="24" y="72" width="210" height="66" rx="9" fill="#f6f7f9" stroke="#e0e4ea"/>
+  <rect x="24" y="72" width="238" height="66" rx="9" fill="#f6f7f9" stroke="#e0e4ea"/>
   <text x="38" y="94" font-size="12.5" font-weight="700" fill="#161a20">BUILDPLAN.md + opzet.json</text>
   <text x="38" y="112" font-size="11" fill="#5b6472">tasks from the plan, edges by hand</text>
-  <text x="38" y="128" font-size="11" fill="#5b6472">the plan states one edge; humans state the rest</text>
+  <text x="38" y="128" font-size="11" fill="#5b6472">the plan states one edge, humans the rest</text>
 
   <rect x="24" y="152" width="210" height="52" rx="9" fill="#f6f7f9" stroke="#e0e4ea"/>
   <text x="38" y="174" font-size="12.5" font-weight="700" fill="#161a20">config.json</text>
@@ -36,8 +36,8 @@
   <!-- engineers -->
   <rect x="608" y="72" width="348" height="60" rx="9" fill="#ffffff" stroke="#e0e4ea"/>
   <text x="622" y="94" font-size="12.5" font-weight="700" fill="#161a20">Engineer — one role, two implementations</text>
-  <text x="622" y="112" font-size="11" fill="#5b6472">in: task text, starting branch, forbidden list, test command</text>
-  <text x="622" y="126" font-size="11" fill="#5b6472">out: a branch with commits, a progress stream, an end signal</text>
+  <text x="622" y="112" font-size="11" fill="#5b6472">in: task text, starting branch, forbidden list, test cmd</text>
+  <text x="622" y="126" font-size="11" fill="#5b6472">out: a branch with commits, progress, an end signal</text>
 
   <rect x="608" y="142" width="168" height="76" rx="9" fill="#f6f7f9" stroke="#e0e4ea"/>
   <text x="622" y="164" font-size="12" font-weight="700" fill="#161a20">local agent</text>
@@ -45,11 +45,11 @@
   <text x="622" y="198" font-size="11" fill="#5b6472">runs the area's own tests</text>
   <text x="622" y="212" font-size="11" fill="#5b6472">used in the demo run</text>
 
-  <rect x="788" y="142" width="168" height="76" rx="9" fill="#ffffff" stroke="#0b6bcb" stroke-width="1.6"/>
-  <text x="802" y="164" font-size="12" font-weight="700" fill="#161a20">Jules session</text>
-  <text x="802" y="182" font-size="11" fill="#0b6bcb">Google Jules API (alpha)</text>
-  <text x="802" y="198" font-size="11" fill="#5b6472">own Google Cloud VM per task</text>
-  <text x="802" y="212" font-size="11" fill="#c02b32">written, never executed</text>
+  <rect x="780" y="142" width="176" height="76" rx="9" fill="#ffffff" stroke="#0b6bcb" stroke-width="1.6"/>
+  <text x="792" y="164" font-size="12" font-weight="700" fill="#161a20">Jules session</text>
+  <text x="792" y="182" font-size="11" fill="#0b6bcb">Google Jules API (alpha)</text>
+  <text x="792" y="198" font-size="11" fill="#5b6472">own Cloud VM per task</text>
+  <text x="792" y="212" font-size="11" fill="#c02b32">written, never executed</text>
 
   <path d="M554,102 L604,102" stroke="#6f7784" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
   <text x="558" y="94" font-size="10" fill="#6f7784">delegate</text>
@@ -69,7 +69,7 @@
   <text x="622" y="262" font-size="12.5" font-weight="700" fill="#161a20">Event log — append-only JSONL</text>
   <text x="622" y="282" font-size="11.5" fill="#0b6bcb">▪ reported — what the agent says: rich, early, untrustworthy</text>
   <text x="622" y="300" font-size="11.5" fill="#0e8a57">▫ measured — what git says: thin, late, impossible to fake</text>
-  <text x="622" y="322" font-size="11" fill="#5b6472">two of the eight warnings fire where the two disagree</text>
+  <text x="622" y="322" font-size="11" fill="#5b6472">two of the warnings fire where these two disagree</text>
 
   <path d="M554,290 L604,290" stroke="#6f7784" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
 
@@ -77,19 +77,19 @@
   <rect x="288" y="368" width="668" height="94" rx="9" fill="#ffffff" stroke="#0b6bcb" stroke-width="1.6"/>
   <text x="304" y="390" font-size="12.5" font-weight="700" fill="#161a20">Dashboard — local, 127.0.0.1, server-sent events</text>
   <text x="304" y="410" font-size="11" fill="#5b6472">build plan with the reason beside every blocked subtask · each engineer's measured git state</text>
-  <text x="304" y="426" font-size="11" fill="#5b6472">eight warnings and alarms · the event log with its two sources</text>
+  <text x="304" y="426" font-size="11" fill="#5b6472">warnings and alarms · the event log with its two sources</text>
   <text x="304" y="446" font-size="11" fill="#161a20" font-weight="600">point-at writes the next job; the manager reads it at the start of its next turn</text>
 
   <path d="M782,334 L782,364" stroke="#6f7784" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
   <path d="M288,410 C240,410 240,150 284,150" stroke="#0b6bcb" stroke-width="1.5" fill="none" stroke-dasharray="5 4" marker-end="url(#b)"/>
-  <text x="150" y="404" font-size="10.5" fill="#0b6bcb">what the human points at</text>
+  <text x="60" y="404" font-size="10.5" fill="#0b6bcb">what the human points at</text>
 
   <!-- output -->
-  <rect x="24" y="240" width="210" height="94" rx="9" fill="#ffffff" stroke="#0e8a57" stroke-width="1.6"/>
+  <rect x="24" y="240" width="238" height="94" rx="9" fill="#ffffff" stroke="#0e8a57" stroke-width="1.6"/>
   <text x="38" y="262" font-size="12.5" font-weight="700" fill="#161a20">Trial branch</text>
   <text x="38" y="281" font-size="11" fill="#5b6472">the only place work comes together</text>
   <text x="38" y="299" font-size="11" fill="#5b6472">graph updated, log line written</text>
-  <text x="38" y="319" font-size="11" fill="#161a20" font-weight="600">no checkbox — a human ticks those</text>
+  <text x="38" y="319" font-size="11" fill="#161a20" font-weight="600">no checkbox — that is a human&#8217;s job</text>
   <path d="M288,290 L240,290" stroke="#0e8a57" stroke-width="1.5" fill="none" marker-end="url(#c)"/>
 
   <text x="24" y="500" font-size="11" fill="#8b94a3">Demonstrated on Phase 7 of this repository's own backlog: five subtasks built, tested, merged and logged in under a minute.</text>

@@ -10,6 +10,8 @@ differing only in which files got assigned, scored 8.7% and 34.3%.
 
 So the delegation decision is the part we gave to an agent. Everything else is ordinary code.
 
+![Architecture](docs/architecture-factory.png)
+
 ---
 
 ## Hackathon submission — All Things Agentic
