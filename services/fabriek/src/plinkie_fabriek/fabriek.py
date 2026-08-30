@@ -266,13 +266,31 @@ def stappen_voor(subtaak: str, engineer_naam: str, runmap: Path, *, toon_verbod:
 
 
 def droogloop(runmap: Path, cfg: dict, *, toon_verbod: bool = False) -> int:
+    """Ronden draaien tot er niets meer vrij is.
+
+    Eén ronde was niet genoeg: hij merget wat op dat moment vrij is, en de
+    subtaken die dáárdoor vrijkomen bleven liggen. De agentlus doet wél meerdere
+    ronden, dus de droogloop liet iets anders zien dan de echte run — en juist
+    deze is wat een buitenstaander draait om het na te lopen.
+    """
     verzeker_graaf(runmap)
+    for _ in range(6):
+        if _ronde(runmap, cfg, toon_verbod=toon_verbod) != "verder":
+            break
+    logboek.schrijf(runmap, bron="gemeten", wie="manager", soort="run-gestopt",
+                    tekst="droogloop afgerond")
+    return 0
+
+
+def _ronde(runmap: Path, cfg: dict, *, toon_verbod: bool = False) -> str:
     """De gate uit C14: echte worktrees, echte commits, echte toets, geen model.
     Een scherm dat de proef moet meten, mag niet zelf ongemeten zijn."""
     g = json.loads((runmap / "graaf.json").read_text(encoding="utf-8"))
     vrij = [n for n in g["bereik"] if graafmodule.stand(n, g)[0] == "vrij"]
+    if not vrij:
+        return "klaar"
     logboek.schrijf(runmap, bron="gemeten", wie="manager", soort="run-gestart",
-                    tekst=f"droogloop — geen model, geen kosten; {len(vrij)} subtaken vrij")
+                    tekst=f"ronde — geen model, geen kosten; {len(vrij)} subtaken vrij")
 
     aan_het_werk = []
     for teller, subtaak in enumerate(vrij[: cfg.get("engineers", 2)], start=1):
@@ -310,12 +328,10 @@ def droogloop(runmap: Path, cfg: dict, *, toon_verbod: bool = False) -> int:
                 # of de administratie klopt.
                 logboek.schrijf(runmap, bron="gemeten", wie="manager", soort="run-gestopt",
                                 tekst="afgebroken op de verbodslijst; de rest is niet uitgedeeld")
-                return 1
+                return "klaar"
             g = json.loads((runmap / "graaf.json").read_text(encoding="utf-8"))
 
-    logboek.schrijf(runmap, bron="gemeten", wie="manager", soort="run-gestopt",
-                    tekst="droogloop afgerond")
-    return 0
+    return "verder" if aan_het_werk else "klaar"
 
 
 # ------------------------------------------------------------------- de run

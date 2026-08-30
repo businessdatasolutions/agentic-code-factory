@@ -93,7 +93,12 @@ werkwijze-proef: werkwijze-test ## Droogloop van de code factory: echte worktree
 	@# De gate uit C14. Echte git, echte toets, geen modelaanroep en geen kosten.
 	@# Een scherm dat de proef moet meten, mag niet zelf ongemeten zijn — dezelfde
 	@# reden als bij `make speurder-proef`.
-	scripts/werkwijze/fabriek.py --droogloop $(or $(RUN),werkwijze/runs/2026-08-30-01)
+	@scripts/werkwijze/fabriek.py --droogloop $(or $(RUN),werkwijze/runs/2026-08-30-01)
+	@# Een test die niets afdrukt is niet na te lopen. Dit is de uitslag.
+	@echo ""
+	@scripts/werkwijze/graaf.py --toon $(or $(RUN),werkwijze/runs/2026-08-30-01)
+	@echo ""
+	@echo "Verwacht: 7.1, 7.2, 7.4, 7.5 en 7.6 gemerged; 7.3 geblokkeerd op 6.18 t/m 6.21."
 
 .PHONY: fabriek-run
 fabriek-run: ## Eén ronde van de code factory met de ADK-manager (kost modeltokens)

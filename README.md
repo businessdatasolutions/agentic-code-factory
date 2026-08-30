@@ -67,33 +67,120 @@ can read; every other edge is stated by hand in `werkwijze/opzet-fase7.json`.
 
 ---
 
-## Running it
+## Reproducible testing
 
-No Google Cloud account is needed for the dry run; it uses no model and costs nothing.
+Everything below runs without a Google Cloud account, without an API key, and without a model. It
+costs nothing. Verified on the versions listed; nothing here is version-sensitive beyond git
+worktree support.
+
+**Prerequisites**
+
+| Tool | Verified on | Needed for |
+|---|---|---|
+| `git` | 2.50.1 | worktrees — the isolation the whole thing rests on |
+| `python3` | 3.9.6 | the guardrail, the graph, the dry run. **Standard library only, no virtualenv** |
+| `node` | 24.19.0 | the dashboard. Built-in modules only, no `npm install` |
+| `make` | any | the entry points |
+| `uv` + a Google Cloud project | 0.12.5 | *optional* — only for the ADK manager on Gemini |
+
+**1. Clone and check the guardrail**
 
 ```bash
-make werkwijze-test      # the guardrail's own tests: 13 path cases, 15 graph scenarios
-make werkwijze-proef     # a full run with scripted engineers — real worktrees, real commits
-make volgscherm          # the dashboard on http://127.0.0.1:8788
-make fabriek-schoon      # back to the starting position
+git clone https://github.com/businessdatasolutions/agentic-code-factory
+cd agentic-code-factory
+make werkwijze-test
 ```
 
-With a Google Cloud project (`gcloud auth application-default login`), the manager becomes an ADK
-agent on Gemini instead of a scripted loop:
+Expected, exactly:
+
+```
+config: 13/13 steekproefgevallen goed
+graaf: 15/15 controles goed
+```
+
+The first line checks the forbidden-path matcher against a table of thirteen cases, five of which
+are deliberate **non**-matches. The second replays fifteen graph scenarios, including the one where
+subtask 7.3 must stay blocked even after every other subtask has merged.
+
+**2. Run the whole loop**
 
 ```bash
+make werkwijze-proef
+```
+
+This creates real `git worktree`s, makes real commits, runs real tests, checks the forbidden-path
+list against each diff, merges to a trial branch and retests after every merge. Two engineers work
+in parallel; merging is sequential. It ends by printing the board:
+
+```
+Fase 7 — bewakingsmotor
+  7.1    gemerged     `services/watchdog/`: deterministische join      [eng-1]
+  7.2    gemerged     Drempels per gebruiker (default € 15/mnd)        [eng-2]
+  7.3    geblokkeerd  Alert-flow: watchdog → Pub/Sub → bezorgdienst
+         wacht op 6.18, 6.19, 6.20, 6.21  (buiten deze run: 6.18, 6.19, 6.20, 6.21)
+  7.4    gemerged     Kalender-triggers los van prijstriggers getest   [eng-1]
+  7.5    gemerged     Anti-ruis: maximaal 1 alert per contract         [eng-2]
+  7.6    gemerged     Watchdog als stap 8 in de nachtrun               [eng-1]
+```
+
+**Five subtasks merged, one left alone.** 7.3 is the check that matters: it states its own
+dependency on four subtasks from a phase that is not in this run, and the manager never assigns it.
+
+Inspect what actually happened:
+
+```bash
+git log --oneline --merges proef/fase7-caid     # one merge commit per subtask
+cat werkwijze/runs/2026-08-30-01/gebeurtenissen.jsonl | tail -20
+```
+
+Every log line carries `"bron": "gemeten"` (observed from git) or `"bron": "gemeld"` (what the agent
+said about itself). That distinction is the point of the log, and it is what revealed two of the
+three bugs described in the write-up.
+
+**3. Watch it happen**
+
+```bash
+make volgscherm     # http://127.0.0.1:8788, then reload the tab
+```
+
+Left column: the build plan with the reason beside every blocked subtask. Right: the manager, the
+engineers with their measured git state, the warnings, and the log with both of its sources. The
+badge at the top shows the guardrail is armed and how often it has run.
+
+**4. See the guardrail refuse a merge**
+
+```bash
+make fabriek-overtreding    # runs nothing; resets the board and arms a scenario
+```
+
+Then press **Volgende ronde starten** on the dashboard. Expected: the badge turns red
+(`poort AFGEGAAN`), two alarms appear with the reason, the run stops, and the offending work is
+**not** on the trial branch:
+
+```bash
+git diff main proef/fase7-caid -- BUILDPLAN.md   # empty: nothing forbidden landed
+```
+
+**The violation is scripted** — `VERBOD_STAP` in `fabriek.py` tells one engineer to touch that file.
+In a normal run nothing breaks the rule, and then the gate is not visible at all. This shows that
+the gate holds; it does not show how often a real model would try.
+
+**5. Reset**
+
+```bash
+make fabriek-schoon     # removes worktrees and branches, rebuilds the graph, stops a running round
+```
+
+**Optional: the manager as a real agent**
+
+```bash
+gcloud auth application-default login
 GOOGLE_CLOUD_PROJECT=<your-project> make fabriek-run
 ```
 
-To see the guardrail refuse a merge, arm a scenario and then start a round from the dashboard:
-
-```bash
-make fabriek-overtreding
-```
-
-That command runs nothing. It resets the board and arms one engineer to touch a forbidden file, so
-you can watch the gate refuse the merge and end the run. **The violation is scripted** — in a normal
-run nothing breaks the rule, and then the gate is not visible at all.
+The scripted loop is replaced by an ADK `LlmAgent` on `gemini-3.7-flash` that decides what to
+delegate. Measured: about 90 seconds for the same five subtasks. This is the only step that costs
+model tokens.
 
 ---
 
